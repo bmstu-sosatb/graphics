@@ -13,7 +13,7 @@ def qsort(b):
 xarr=[]
 yarr=[]
 otstup = 30
-n=560
+n=760
 n1=n-2*otstup
 
 def err1():
@@ -58,6 +58,7 @@ def addt():
     enx.delete(0,END)
     eny.delete(0,END)
 
+## удаление всего
 def dlt():
     canv.delete(ALL)
     lst.delete(0,END)
@@ -70,6 +71,7 @@ def dlt():
         xarr.clear()
         yarr.clear()
 
+## удаление одной точки
 def delpoint():
     select = lst.curselection()
     if len(select) == 1:
@@ -77,6 +79,7 @@ def delpoint():
         yarr.pop(select[0])
         lst.delete(select[0])
 
+## редактирование точки
 def editpoint():
     select = lst.curselection()
     if len(select) == 1:
@@ -85,6 +88,7 @@ def editpoint():
         lst.delete(select[0])
         enx.insert(0, str(x))
         eny.insert(0, y)
+
 
 def pointdist(a,b,c,d):
     pd=((a-c)**2+(b-d)**2)**(1/2)
@@ -111,7 +115,7 @@ def axis_dest(x, y):
     return abs(x) + abs(y)
 
 def solve():
-    global l,idiff,jdiff,kdiff,lbdiff1,lbdiff2
+    global l,idiff,jdiff,kdiff,lbdiff1,lbdiff2,point
     length=len(xarr)
 
     if length<3:
@@ -143,10 +147,9 @@ def solve():
                 heightdest = -1
                 height1 = []
                 height2 = []
-                global point
                 point = []
                 dest = []
-                for i in range(length-2):
+                for i in range(length-2):                      ## перебор всех точек
                     for j in range(i,length-1):
                         for k in range(j,length):
                             newheight1 = find_height(xarr[i], yarr[i], xarr[j], yarr[j], xarr[k], yarr[k])
