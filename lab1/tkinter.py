@@ -316,7 +316,7 @@ root.mainloop()
 
 
 
-
+##https://github.com/MightGainer/mashgraph/blob/master/lab%202/gui.py
 
 ##    
 ##def solve1():
