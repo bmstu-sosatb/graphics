@@ -11,7 +11,8 @@ def qsort(b):
     arrLess=list(map((lambda lol:lol[0]),filter((lambda m : (m[0]<=b[index_opor])&(m[1]!=index_opor)),zip(b,range(0,len(b))))))
     return qsort(arrLess)+[b[index_opor]]+qsort(arrBigger)
 
-global romb, figure, a, b, k, l, xcentr, ycentr, shtr
+global romb, figure, a, b, k, l, xcentr, ycentr, shtr, eps
+eps = 0.0001
 a = 70
 b = 30
 k = b*1.5/a
@@ -30,9 +31,9 @@ def form_figure():
     t = 0
     while t <= 2*pi:
         c = cos(t)
-        bc = b*c
-        x = a*(c**2) + bc
-        y = a*c*sin(t) + bc
+        s = sin(t)
+        x = a*(c**2) + b*c
+        y = a*c*s + b*s
         figure.append([x + xcentr,-y + ycentr])
         t += step
 
@@ -51,21 +52,48 @@ def form_romb():
 def shtrikh():
     amount = 10
     lstep = l*2/(amount+1)
-    l1 = l - lstep
+    ln = l - lstep
+    kn = -k
     for i in range(amount+1):
-        x = -a*3*(amount - i)/(amount + 1)
+        x = -a*3
         y = -k*x-l
         stop = -x
-        step = 2*abs(x) /1000
-        #x += stop-(a*3-stop)
+        step = 2*abs(x)/1000
+        rpoints = cross(kn, ln, romb)
+        fpoints = cross(kn, ln, figure)
+        rpoints = sort(rpoints)
+        fpoints = sort(fpoints)
+##        print(fpoints)
+##        print(rpoints)
+        lenr = len(rpoints)
+        lenf = len(fpoints)
         while x<stop:
-            shtr.append([x + xcentr, -k*x + l1 + ycentr])
+##            ynew = kn*x + ln + ycentr
+            xnew = x + xcentr
+            if lenr > 0 and xnew >= rpoints[0][0] and xnew <= rpoints[lenr-1][0] and (lenf == 0 or (lenf > 0 and (xnew <= fpoints[0][0] or xnew >= fpoints[lenf-1][0]))): 
+                shtr.append([xnew, kn*x + ln + ycentr])
             x += step
-        l1 -= lstep
-        
-        
-    
-    
+        ln -= lstep
+                
+
+def sort(points):
+    length = len(points)
+    flag = 1
+    for i in range(length):
+        for j in range(length - 1):
+            if points[j][0] > points[j+1][0]:
+                flag = 0
+                points[j], points[j+1] = points[j+1], points[j]
+        if flag:
+            break
+    return points
+
+def cross(kn,ln, fig):
+    points = []
+    for dot in fig:
+        if fabs(dot[1]-ycentr - kn*(dot[0]-xcentr) - ln ) <= eps:
+            points.append([dot[0], dot[1]])
+    return points
 
 def err1():
     messagebox.showerror('Ошибка','Неверный ввод чисел')
