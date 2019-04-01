@@ -3,14 +3,6 @@ from tkinter import messagebox
 from random import randint
 from math import *
 
-def qsort(b):
-    if b==[]:
-       return b
-    index_opor=randint(0,len(b)-1)
-    arrBigger=list(filter((lambda k: k>b[index_opor]),b))
-    arrLess=list(map((lambda lol:lol[0]),filter((lambda m : (m[0]<=b[index_opor])&(m[1]!=index_opor)),zip(b,range(0,len(b))))))
-    return qsort(arrLess)+[b[index_opor]]+qsort(arrBigger)
-
 global romb, figure, a, b, k, l, xcentr, ycentr, shtr, eps
 eps = 0.0001
 a = 70
@@ -25,7 +17,9 @@ n=800
 xcentr = n/2
 ycentr = n/2
 
-
+def function(y, x):
+    return (x**2 + y**2 -a*y)**2 - b**2 * (x**2 + y**2)
+    
 def form_figure():
     step = 2*pi / 1000
     t = 0
@@ -54,46 +48,18 @@ def shtrikh():
     lstep = l*2/(amount+1)
     ln = l - lstep
     kn = -k
-    for i in range(amount+1):
+    for i in range(amount):
         x = -a*3
-        y = -k*x-l
         stop = -x
         step = 2*abs(x)/1000
-        rpoints = cross(kn, ln, romb)
-        fpoints = cross(kn, ln, figure)
-        rpoints = sort(rpoints)
-        fpoints = sort(fpoints)
-##        print(fpoints)
-##        print(rpoints)
-        lenr = len(rpoints)
-        lenf = len(fpoints)
         while x<stop:
-##            ynew = kn*x + ln + ycentr
-            xnew = x + xcentr
-            if lenr > 0 and xnew >= rpoints[0][0] and xnew <= rpoints[lenr-1][0] and (lenf == 0 or (lenf > 0 and (xnew <= fpoints[0][0] or xnew >= fpoints[lenf-1][0]))): 
-                shtr.append([xnew, kn*x + ln + ycentr])
+            ynew = kn*x + ln
+            xnew = x
+            if (ynew < k*xnew + l and ynew > k*xnew - l and function(xnew, ynew) > 0 and not (xnew > 0 and xnew < (a - b) and (ynew < (a - b)/2) and ynew > (b - a)/2)):
+                shtr.append([xnew + xcentr, ynew + ycentr])
             x += step
         ln -= lstep
-                
 
-def sort(points):
-    length = len(points)
-    flag = 1
-    for i in range(length):
-        for j in range(length - 1):
-            if points[j][0] > points[j+1][0]:
-                flag = 0
-                points[j], points[j+1] = points[j+1], points[j]
-        if flag:
-            break
-    return points
-
-def cross(kn,ln, fig):
-    points = []
-    for dot in fig:
-        if fabs(dot[1]-ycentr - kn*(dot[0]-xcentr) - ln ) <= eps:
-            points.append([dot[0], dot[1]])
-    return points
 
 def err1():
     messagebox.showerror('Ошибка','Неверный ввод чисел')
@@ -133,6 +99,9 @@ def move():
             for dot in romb:
                 dot[0] += dx
                 dot[1] -= dy
+            for dot in shtr:
+                dot[0] += dx
+                dot[1] -= dy
             draw()
     else:
         err1()
@@ -167,6 +136,9 @@ def scale():
         for dot in romb:
             dot[0] = kx*dot[0] + (1-kx)*xc
             dot[1] = ky*dot[1] + (1-ky)*yc
+        for dot in shtr:
+            dot[0] = kx*dot[0] + (1-kx)*xc
+            dot[1] = ky*dot[1] + (1-ky)*yc
         draw()
             
     else:
@@ -191,6 +163,7 @@ def rotate():
         xc1=float(xc1)
         yc1=float(yc1)
         angle = float(angle)
+        yc1 *= -1
         xc1 += xcentr
         yc1 += ycentr
         a_rad = angle*pi/180
@@ -201,6 +174,10 @@ def rotate():
             dot[0] = xc1 + (dot[0]-xc1)*c + (dot[1]-yc1)*s
             dot[1] = yc1 - (x-xc1)*s + (dot[1]-yc1)*c
         for dot in romb:
+            x = dot[0]
+            dot[0] = xc1 + (dot[0]-xc1)*c + (dot[1]-yc1)*s
+            dot[1] = yc1 - (x-xc1)*s + (dot[1]-yc1)*c
+        for dot in shtr:
             x = dot[0]
             dot[0] = xc1 + (dot[0]-xc1)*c + (dot[1]-yc1)*s
             dot[1] = yc1 - (x-xc1)*s + (dot[1]-yc1)*c
