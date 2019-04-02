@@ -16,6 +16,7 @@ global n
 n=800
 xcentr = n/2
 ycentr = n/2
+print("Вершины ромба: \n\t(0;", l,")\n\t(0;", -l,")")
 
 def function(y, x):
     return (x**2 + y**2 -a*y)**2 - b**2 * (x**2 + y**2)
@@ -34,6 +35,7 @@ def form_figure():
 def form_romb():
     step = a/1000
     x = -a*3
+    print("\t(", x, ";0)\n\t(", -x,";0)")
     while x <= 0:
         y = k*x + l
         romb.append([x + xcentr,y + ycentr])
