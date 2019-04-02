@@ -83,16 +83,6 @@ def chek(x):
     return q
 
 
-    ##    r1 = romb.copy()
-##    f1 = figure.copy()
-##    s1 = shtr.copy()
-##    romb = rprev.copy()
-##    figure = fprev.copy()
-##    shtr = sprev.copy()
-##    fprev = f1.copy()
-##    rprev = r1.copy()
-##    sprev = s1.copy()
-
 def copy():
     global fprev, sprev, rprev
     fprev = []
