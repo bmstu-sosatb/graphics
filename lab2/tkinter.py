@@ -3,8 +3,8 @@ from tkinter import messagebox
 from random import randint
 from math import *
 
-global romb, figure, a, b, k, l, xcentr, ycentr, shtr, eps
-eps = 0.0001
+global romb, figure, a, b, k, l, xcentr, ycentr, shtr
+
 a = 70
 b = 30
 k = b*1.5/a
@@ -12,6 +12,7 @@ l = b*4.5
 romb = []
 figure = []
 shtr = []
+
 global n
 n=800
 xcentr = n/2
@@ -82,6 +83,40 @@ def chek(x):
     return q
 
 
+    ##    r1 = romb.copy()
+##    f1 = figure.copy()
+##    s1 = shtr.copy()
+##    romb = rprev.copy()
+##    figure = fprev.copy()
+##    shtr = sprev.copy()
+##    fprev = f1.copy()
+##    rprev = r1.copy()
+##    sprev = s1.copy()
+
+def copy():
+    global fprev, sprev, rprev
+    fprev = []
+    rprev = []
+    sprev = []
+    for dot in figure:
+        fprev.append([dot[0], dot[1]])
+    for dot in romb:
+        rprev.append([dot[0], dot[1]])
+    for dot in shtr:
+        sprev.append([dot[0], dot[1]])
+
+def copy_back():
+    global figure, romb, shtr
+    figure = []
+    romb = []
+    shtr = []
+    for dot in fprev:
+        figure.append([dot[0], dot[1]])
+    for dot in rprev:
+        romb.append([dot[0], dot[1]])
+    for dot in sprev:
+        shtr.append([dot[0], dot[1]])
+
 def move():
     dx = rsdx.get()
     dy = rsdy.get()
@@ -95,6 +130,7 @@ def move():
         if fabs(dx) < 0.5 and fabs(dy) < 0.5:
             messagebox.showerror('Ошибка','Слишком маленькое смещение')
         else:
+            copy()
             for dot in figure:
                 dot[0] += dx
                 dot[1] -= dy
@@ -104,7 +140,8 @@ def move():
             for dot in shtr:
                 dot[0] += dx
                 dot[1] -= dy
-            draw()
+            
+            draw(romb, figure, shtr)
     else:
         err1()
     endx.delete(0,END)
@@ -132,6 +169,7 @@ def scale():
         yc=float(yc)
         xc += xcentr
         yc += ycentr
+        copy()
         for dot in figure:
             dot[0] = kx*dot[0] + (1-kx)*xc
             dot[1] = ky*dot[1] + (1-ky)*yc
@@ -141,7 +179,7 @@ def scale():
         for dot in shtr:
             dot[0] = kx*dot[0] + (1-kx)*xc
             dot[1] = ky*dot[1] + (1-ky)*yc
-        draw()
+        draw(romb, figure, shtr)
             
     else:
         err1()
@@ -171,6 +209,7 @@ def rotate():
         a_rad = angle*pi/180
         c = cos(a_rad)
         s = sin(a_rad)
+        copy()
         for dot in figure:
             x = dot[0]
             dot[0] = xc1 + (dot[0]-xc1)*c + (dot[1]-yc1)*s
@@ -183,7 +222,8 @@ def rotate():
             x = dot[0]
             dot[0] = xc1 + (dot[0]-xc1)*c + (dot[1]-yc1)*s
             dot[1] = yc1 - (x-xc1)*s + (dot[1]-yc1)*c
-        draw()
+
+        draw(romb, figure, shtr)
             
     else:
         err1()
@@ -193,20 +233,6 @@ def rotate():
     enyc.delete(0,END)
   
 
-
-def dlt():
-    pass
-    canv.delete(ALL)
-    lst.delete(0,END)
-    try:
-        lbdiff1.destroy()
-        lbdiff2.destroy()
-        xarr.clear()
-        yarr.clear()
-    except:
-        xarr.clear()
-        yarr.clear()
-
 def delpoint():
     select = lst.curselection()
     if len(select) == 1:
@@ -215,22 +241,24 @@ def delpoint():
         lst.delete(select[0])
 
 
-
 def print_fig(dots):
     for dot in dots:
         canv.create_oval(dot[0],dot[1],dot[0],dot[1],width=1, fill = 'black')
 
-def draw():
+def draw(r, f, s):
     canv.delete(ALL)
     canv.create_line(0,ycentr,n,ycentr,fill='red')#оси
     canv.create_text(n-10, ycentr-10, fill = 'black', text = 'X')
     canv.create_line(xcentr,0,xcentr,n,fill='red')
     canv.create_text(xcentr+10, 10, fill = 'black', text = 'Y')
     
-    print_fig(romb)
-    print_fig(figure)
-    print_fig(shtr)
+    print_fig(r)
+    print_fig(f)
+    print_fig(s)
 
+def back():
+    copy_back()
+    draw(rprev, fprev, sprev)
     
 root=Tk()
 root.title('Точки')
@@ -301,16 +329,18 @@ btns=Button(root,text='Масштабировать',command=scale)
 btns.grid(row=9,column=0, columnspan = 2)
 btnr=Button(root,text='Повернуть',command=rotate)
 btnr.grid(row=14,column=0, columnspan = 2)
+btnback=Button(root,text='Шаг назад',command=back)
+btnback.grid(row=16,column=0, columnspan = 2)
 
 canv=Canvas(root,width=n,height=n,bg='white')
 canv.grid(row=0,column=2,rowspan=n,columnspan=n)
 
 
-
 form_figure()
 form_romb()
 shtrikh()
-draw()
+copy()
+draw(romb, figure, shtr)
 
 
 root.mainloop()
