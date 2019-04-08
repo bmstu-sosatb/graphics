@@ -82,31 +82,6 @@ def chek(x):
                 q=1
     return q
 
-
-def copy():
-    global fprev, sprev, rprev
-    fprev = []
-    rprev = []
-    sprev = []
-    for dot in figure:
-        fprev.append([dot[0], dot[1]])
-    for dot in romb:
-        rprev.append([dot[0], dot[1]])
-    for dot in shtr:
-        sprev.append([dot[0], dot[1]])
-
-def copy_back():
-    global figure, romb, shtr
-    figure = []
-    romb = []
-    shtr = []
-    for dot in fprev:
-        figure.append([dot[0], dot[1]])
-    for dot in rprev:
-        romb.append([dot[0], dot[1]])
-    for dot in sprev:
-        shtr.append([dot[0], dot[1]])
-
 def move():
     dx = rsdx.get()
     dy = rsdy.get()
@@ -155,21 +130,24 @@ def scale():
     if qx==1 and qy==1 and qc1==1 and qc2==1:
         kx=float(kx)
         ky=float(ky)
-        xc=float(xc)
-        yc=float(yc)
-        xc += xcentr
-        yc += ycentr
-        copy()
-        for dot in figure:
-            dot[0] = kx*dot[0] + (1-kx)*xc
-            dot[1] = ky*dot[1] + (1-ky)*yc
-        for dot in romb:
-            dot[0] = kx*dot[0] + (1-kx)*xc
-            dot[1] = ky*dot[1] + (1-ky)*yc
-        for dot in shtr:
-            dot[0] = kx*dot[0] + (1-kx)*xc
-            dot[1] = ky*dot[1] + (1-ky)*yc
-        draw(romb, figure, shtr)
+        if kx < 0 or ky < 0:
+            messagebox.showerror('Ошибка','Коэффициенты масштабирования не могут быть отрицательными')
+        else:
+            xc=float(xc)
+            yc=float(yc)
+            xc += xcentr
+            yc += ycentr
+            copy()
+            for dot in figure:
+                dot[0] = kx*dot[0] + (1-kx)*xc
+                dot[1] = ky*dot[1] + (1-ky)*yc
+            for dot in romb:
+                dot[0] = kx*dot[0] + (1-kx)*xc
+                dot[1] = ky*dot[1] + (1-ky)*yc
+            for dot in shtr:
+                dot[0] = kx*dot[0] + (1-kx)*xc
+                dot[1] = ky*dot[1] + (1-ky)*yc
+            draw(romb, figure, shtr)
             
     else:
         err1()
@@ -245,6 +223,30 @@ def draw(r, f, s):
     print_fig(r)
     print_fig(f)
     print_fig(s)
+
+def copy():
+    global fprev, sprev, rprev
+    fprev = []
+    rprev = []
+    sprev = []
+    for dot in figure:
+        fprev.append([dot[0], dot[1]])
+    for dot in romb:
+        rprev.append([dot[0], dot[1]])
+    for dot in shtr:
+        sprev.append([dot[0], dot[1]])
+
+def copy_back():
+    global figure, romb, shtr
+    figure = []
+    romb = []
+    shtr = []
+    for dot in fprev:
+        figure.append([dot[0], dot[1]])
+    for dot in rprev:
+        romb.append([dot[0], dot[1]])
+    for dot in sprev:
+        shtr.append([dot[0], dot[1]])
 
 def back():
     copy_back()
