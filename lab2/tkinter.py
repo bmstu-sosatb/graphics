@@ -130,24 +130,21 @@ def scale():
     if qx==1 and qy==1 and qc1==1 and qc2==1:
         kx=float(kx)
         ky=float(ky)
-        if kx < 0 or ky < 0:
-            messagebox.showerror('Ошибка','Коэффициенты масштабирования не могут быть отрицательными')
-        else:
-            xc=float(xc)
-            yc=float(yc)
-            xc += xcentr
-            yc += ycentr
-            copy()
-            for dot in figure:
-                dot[0] = kx*dot[0] + (1-kx)*xc
-                dot[1] = ky*dot[1] + (1-ky)*yc
-            for dot in romb:
-                dot[0] = kx*dot[0] + (1-kx)*xc
-                dot[1] = ky*dot[1] + (1-ky)*yc
-            for dot in shtr:
-                dot[0] = kx*dot[0] + (1-kx)*xc
-                dot[1] = ky*dot[1] + (1-ky)*yc
-            draw(romb, figure, shtr)
+        xc=float(xc)
+        yc=float(yc)
+        xc += xcentr
+        yc += ycentr
+        copy()
+        for dot in figure:
+            dot[0] = kx*dot[0] + (1-kx)*xc
+            dot[1] = ky*dot[1] + (1-ky)*yc
+        for dot in romb:
+            dot[0] = kx*dot[0] + (1-kx)*xc
+            dot[1] = ky*dot[1] + (1-ky)*yc
+        for dot in shtr:
+            dot[0] = kx*dot[0] + (1-kx)*xc
+            dot[1] = ky*dot[1] + (1-ky)*yc
+        draw(romb, figure, shtr)
             
     else:
         err1()
