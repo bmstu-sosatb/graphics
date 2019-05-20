@@ -31,6 +31,8 @@ MainWindow::MainWindow(QWidget *parent) :
 MainWindow::~MainWindow()
 {
     delete ui;
+    delete pen;
+    delete scene;
 }
 
 void MainWindow::clean_clicked()
