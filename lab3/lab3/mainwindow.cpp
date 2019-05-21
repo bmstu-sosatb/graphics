@@ -6,7 +6,7 @@
 #include <qpainter.h>
 #include <QColor>
 #include <QColorDialog>
-#include <QGraphicsScene>
+#include <QLabel>
 #define _USE_MATH_DEFINES
 #include <math.h>
 
@@ -16,12 +16,12 @@ MainWindow::MainWindow(QWidget *parent) :
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
-    scene = new QGraphicsScene(this);
-    ui->graphicsView->setScene(scene);
+    scene = new QPixmap(710, 710);
+    scene->fill(QColor("transparent"));
+    painter = new QPainter(scene);
+    painter->setPen(Qt::black);
     ui->radioButton_dll->setChecked(true);
-    scene->setBackgroundBrush(Qt::white);
-    pen = new QPen;
-    pen->setColor(Qt::black);
+    ui->draw_label->setAutoFillBackground(true);
 
     connect(ui->pushButton_drawone, SIGNAL(clicked()), this, SLOT(drawone_clicked()));
     connect(ui->pushButton_clean, SIGNAL(clicked()), this, SLOT(clean_clicked()));
@@ -31,45 +31,65 @@ MainWindow::MainWindow(QWidget *parent) :
 MainWindow::~MainWindow()
 {
     delete ui;
-    delete pen;
-    delete scene;
 }
 
 void MainWindow::clean_clicked()
 {
-    scene->clear();
+    ui->draw_label->setStyleSheet("QLabel { background-color : white; }");
+    delete painter;
+    delete scene;
+    scene = new QPixmap(710, 710);
+    scene->fill(QColor("transparent"));
+    painter = new QPainter(scene);
+    painter->setPen(Qt::black);
+    ui->draw_label->setPixmap(*scene);
 }
+
 
 void MainWindow::change_colour()
 {
     switch (ui->BackgroundColourcomboBox->currentIndex()){
-    case 0: scene->setBackgroundBrush(Qt::white);
-            break;
-    case 1: scene->setBackgroundBrush(Qt::black);
-            break;
-    case 2: scene->setBackgroundBrush(Qt::yellow);
-            break;
-    case 3: scene->setBackgroundBrush(Qt::red);
-            break;
-    case 4: scene->setBackgroundBrush(Qt::blue);
-            break;
-    case 5: scene->setBackgroundBrush(Qt::green);
-            break;
-    default: break;
+    case 1:
+        ui->draw_label->setStyleSheet("QLabel { background-color : black; }");
+        break;
+    case 0:
+        ui->draw_label->setStyleSheet("QLabel { background-color : white; }");
+        break;
+    case 3:
+        ui->draw_label->setStyleSheet("QLabel { background-color : red; }");
+        break;
+    case 5:
+        ui->draw_label->setStyleSheet("QLabel { background-color : green; }");
+        break;
+    case 2:
+        ui->draw_label->setStyleSheet("QLabel { background-color : yellow; }");
+        break;
+    case 4:
+        ui->draw_label->setStyleSheet("QLabel { background-color : blue; }");
+        break;
+    default:
+        break;
     }
+//    ui->draw_label->show();
     switch (ui->LinesColourcomboBox->currentIndex()){
-    case 0: pen->setColor(Qt::black);
-            break;
-    case 1: pen->setColor(Qt::white);
-            break;
-    case 2: pen->setColor(Qt::yellow);
-            break;
-    case 3: pen->setColor(Qt::red);
-            break;
-    case 4: pen->setColor(Qt::green);
-            break;
-    case 5: pen->setColor(Qt::blue);
-            break;
+    case 0:
+        painter->setPen(QColor(Qt::black));
+        break;
+    case 1:
+        painter->setPen(QColor(Qt::white));
+        break;
+    case 2:
+        painter->setPen(QColor(Qt::yellow));
+        break;
+    case 3:
+        painter->setPen(QColor(Qt::red));
+        break;
+    case 4:
+        painter->setPen(QColor(Qt::green));
+        break;
+    case 5:
+        painter->setPen(QColor(Qt::blue));
+        break;
     default: break;
     }
 }
@@ -120,6 +140,7 @@ void MainWindow::drawone_clicked()
             printf("dll\n");
             draw_dll(xbeg, ybeg, xend, yend);
         }
+        ui->draw_label->setPixmap(*scene);
     }
     else
     {
@@ -129,14 +150,14 @@ void MainWindow::drawone_clicked()
         msg.setIcon(QMessageBox::Information);
         msg.setDefaultButton(QMessageBox::Ok);
         msg.exec();
-        if (!q1)
-            ui->lineEdit_xbeg->clear();
-        if (!q2)
-            ui->lineEdit_ybeg->clear();
-        if (!q3)
-            ui->lineEdit_xend->clear();
-        if (!q4)
-            ui->lineEdit_yend->clear();
+//        if (!q1)
+//            ui->lineEdit_xbeg->clear();
+//        if (!q2)
+//            ui->lineEdit_ybeg->clear();
+//        if (!q3)
+//            ui->lineEdit_xend->clear();
+//        if (!q4)
+//            ui->lineEdit_yend->clear();
     }
 }
 
@@ -186,6 +207,7 @@ void MainWindow::drawmany_clicked()
             printf("dll\n");
             drawmany(xc, yc, angle, len, draw_dll);
         }
+        ui->draw_label->setPixmap(*scene);
     }
     else
     {
@@ -195,14 +217,14 @@ void MainWindow::drawmany_clicked()
         msg.setIcon(QMessageBox::Information);
         msg.setDefaultButton(QMessageBox::Ok);
         msg.exec();
-        if (!q1)
-            ui->lineEdit_xc->clear();
-        if (!q2)
-            ui->lineEdit_yc->clear();
-        if (!q3)
-            ui->lineEdit_angle->clear();
-        if (!q4)
-            ui->lineEdit_len->clear();
+//        if (!q1)
+//            ui->lineEdit_xc->clear();
+//        if (!q2)
+//            ui->lineEdit_yc->clear();
+//        if (!q3)
+//            ui->lineEdit_angle->clear();
+//        if (!q4)
+//            ui->lineEdit_len->clear();
     }
 }
 
@@ -211,7 +233,7 @@ void MainWindow::draw_cda(int xbeg, int ybeg, int xend, int yend)
     int dx = xend - xbeg;
     int dy = yend - ybeg;
     if (dx == 0 && dy == 0)
-        scene->addEllipse(xbeg, ybeg, 0.1, 0.1, *pen, QBrush());
+        painter->drawPoint(xbeg, ybeg);
     else
     {
         int dltx = abs(dx);
@@ -226,7 +248,7 @@ void MainWindow::draw_cda(int xbeg, int ybeg, int xend, int yend)
         double x = xbeg, y = ybeg;
         for (int i = 0; i < l + 1; i++)
         {
-            scene->addEllipse(round(x), round(y), 0.1, 0.1, *pen, QBrush());
+            painter->drawPoint(round(x), round(y));
             x += sx;
             y += sy;
         }
@@ -248,7 +270,7 @@ void MainWindow::draw_brint(int xbeg, int ybeg, int xend, int yend)
     int dx = xend - xbeg;
     int dy = yend - ybeg;
     if (dx == 0 && dy == 0)
-        scene->addEllipse(xbeg, ybeg, 0.1, 0.1, *pen, QBrush());
+        painter->drawPoint(xbeg, ybeg);
     else
     {
         int x = xbeg, y = ybeg;
@@ -269,7 +291,7 @@ void MainWindow::draw_brint(int xbeg, int ybeg, int xend, int yend)
         int e = 2 * dy - dx;
         for (int i = 0; i < dx + 1; i++)
         {
-            scene->addEllipse(x, y, 0.1, 0.1, *pen, QBrush());
+            painter->drawPoint(x, y);
             if (e >= 0)
             {
                 if (obmen == 0)
@@ -290,7 +312,7 @@ void MainWindow::draw_brfloat(int xbeg, int ybeg, int xend, int yend)
     int dx = xend - xbeg;
     int dy = yend - ybeg;
     if (dx == 0 && dy == 0)
-        scene->addEllipse(xbeg, ybeg, 0.1, 0.1, *pen, QBrush());
+        painter->drawPoint(xbeg, ybeg);
     else
     {
         int x = xbeg, y = ybeg;
@@ -312,7 +334,7 @@ void MainWindow::draw_brfloat(int xbeg, int ybeg, int xend, int yend)
         double e = m - 0.5;
         for (int i = 0; i < dx + 1; i++)
         {
-            scene->addEllipse(x, y, 0.1, 0.1, *pen, QBrush());
+            painter->drawPoint(x, y);
             if (e >= 0)
             {
                 if (obmen == 0)
@@ -330,12 +352,12 @@ void MainWindow::draw_brfloat(int xbeg, int ybeg, int xend, int yend)
 
 void MainWindow::draw_brstep(int xbeg, int ybeg, int xend, int yend)
 {
-    int imax = 255;
-    QColor color(pen->color());
+    int I = 255;
+    QColor color(painter->pen().color());
     int dx = xend - xbeg;
     int dy = yend - ybeg;
     if (dx == 0 && dy == 0)
-        scene->addEllipse(xbeg, ybeg, 0.1, 0.1, *pen, QBrush());
+        painter->drawPoint(xbeg, ybeg);
     else
     {
         int x = xbeg, y = ybeg;
@@ -354,12 +376,12 @@ void MainWindow::draw_brstep(int xbeg, int ybeg, int xend, int yend)
         }
 
         double m = (double) dy / (double) dx;
-        double e = imax * 0.5;
-        m = m * imax;
-        double w = imax - m;
-        color.setAlphaF(imax/2);
-        pen->setColor(color);
-        scene->addEllipse(x, y, 0.1, 0.1, *pen, QBrush());
+        double e = I * 0.5;
+        m = m * I;
+        double w = I - m;
+        color.setAlphaF(I/2);
+        painter->setPen(color);
+        painter->drawPoint(x, y);
         for (int i = 0; i < dx; i++)
         {
             if (e < w)
@@ -376,27 +398,27 @@ void MainWindow::draw_brstep(int xbeg, int ybeg, int xend, int yend)
                 y += sy;
                 e -= w;
             }
-            color.setAlphaF(e / imax);
-            pen->setColor(color);
-            scene->addEllipse(x, y, 0.1, 0.1, *pen, QBrush());
+            color.setAlphaF(e / I);
+            painter->setPen(color);
+            painter->drawPoint(x, y);
         }
     }
 }
 
 void MainWindow::draw_vu(int xbeg, int ybeg, int xend, int yend)
 {
-    int imax = 255;
-    QColor color(pen->color());
+    int I = 255;
+    QColor color(painter->pen().color());
 
     int dx = abs(xend - xbeg);
     int dy = abs(yend - ybeg);
     if (dx == 0 && dy == 0)
-        scene->addEllipse(xbeg, ybeg, 0.1, 0.1, *pen, QBrush());
+        painter->drawPoint(xbeg, ybeg);
     else
     {
         double m;
-        double y_iter = 0;
-        double x_iter = 0;
+        double yi = 0;
+        double xi = 0;
         if (dy < dx)
         {
             if (xend < xbeg)
@@ -411,18 +433,18 @@ void MainWindow::draw_vu(int xbeg, int ybeg, int xend, int yend)
             m = (double)dy / (double)dx;
             if (yend < ybeg)
                 m = -m;
-            y_iter = ybeg + m;
-            scene->addEllipse(xbeg, ybeg, 0.1, 0.1, *pen, QBrush());
-            scene->addEllipse(xend, yend, 0.1, 0.1, *pen, QBrush());
+            yi = ybeg + m;
+            painter->drawPoint(xbeg, ybeg);
+            painter->drawPoint(xend, yend);
             for (int x = xbeg+ 1; x < xend; x++)
             {
-                color.setAlphaF((imax - fabs(y_iter - (int)y_iter) * imax) / imax);
-                pen->setColor(color);
-                scene->addEllipse(x, (int)y_iter, 0.1, 0.1, *pen, QBrush());
-                color.setAlphaF((fabs(y_iter - (int)y_iter) * imax) / imax);
-                pen->setColor(color);
-                scene->addEllipse(x, (int)y_iter + 1, 0.1, 0.1, *pen, QBrush());
-                y_iter += m;
+                color.setAlphaF((I - fabs(yi - (int)yi) * I) / I);
+                painter->setPen(color);
+                painter->drawPoint(x, (int)yi);
+                color.setAlphaF((fabs(yi - (int)yi) * I) / I);
+                painter->setPen(color);
+                painter->drawPoint(x, (int)yi + 1);
+                yi += m;
             }
         }
         else
@@ -439,18 +461,18 @@ void MainWindow::draw_vu(int xbeg, int ybeg, int xend, int yend)
             m = (double)dx / (double)dy;
             if (xend < xbeg)
                 m = -m;
-            x_iter = xbeg + m;
-            scene->addEllipse(xbeg, ybeg, 0.1, 0.1, *pen, QBrush());
-            scene->addEllipse(xend, yend, 0.1, 0.1, *pen, QBrush());
+            xi = xbeg + m;
+            painter->drawPoint(xbeg, ybeg);
+            painter->drawPoint(xend, yend);
             for (int y = ybeg + 1; y < yend; y++)
             {
-                color.setAlphaF((imax - fabs(x_iter - (int)x_iter) * imax) / imax);
-                pen->setColor(color);
-                scene->addEllipse((int)x_iter, y, 0.1, 0.1, *pen, QBrush());
-                color.setAlphaF((fabs(x_iter - (int)x_iter) * imax) / imax);
-                pen->setColor(color);
-                scene->addEllipse((int)x_iter + 1, y, 0.1, 0.1, *pen, QBrush());
-                x_iter += m;
+                color.setAlphaF((I - fabs(xi - (int)xi) * I) / I);
+                painter->setPen(color);
+                painter->drawPoint((int)xi, y);
+                color.setAlphaF((fabs(xi - (int)xi) * I) / I);
+                painter->setPen(color);
+                painter->drawPoint((int)xi + 1, y);
+                xi += m;
             }
         }
     }
@@ -458,7 +480,7 @@ void MainWindow::draw_vu(int xbeg, int ybeg, int xend, int yend)
 
 void MainWindow::draw_dll(int xbeg, int ybeg, int xend, int yend)
 {
-    scene->addLine(xbeg, ybeg, xend, yend, *pen);
+    painter->drawLine(xbeg, ybeg, xend, yend);
 }
 
 

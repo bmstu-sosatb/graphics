@@ -14,7 +14,6 @@
 #include <QtWidgets/QApplication>
 #include <QtWidgets/QButtonGroup>
 #include <QtWidgets/QComboBox>
-#include <QtWidgets/QGraphicsView>
 #include <QtWidgets/QGridLayout>
 #include <QtWidgets/QHeaderView>
 #include <QtWidgets/QLabel>
@@ -35,7 +34,6 @@ class Ui_MainWindow
 {
 public:
     QWidget *centralWidget;
-    QGraphicsView *graphicsView;
     QWidget *layoutWidget;
     QVBoxLayout *verticalLayout;
     QLabel *LinesColourLabel;
@@ -72,6 +70,7 @@ public:
     QLabel *label_9;
     QLineEdit *lineEdit_len;
     QPushButton *pushButton_clean;
+    QLabel *draw_label;
     QMenuBar *menuBar;
     QMenu *menu;
     QToolBar *mainToolBar;
@@ -84,9 +83,6 @@ public:
         MainWindow->resize(1400, 1000);
         centralWidget = new QWidget(MainWindow);
         centralWidget->setObjectName(QStringLiteral("centralWidget"));
-        graphicsView = new QGraphicsView(centralWidget);
-        graphicsView->setObjectName(QStringLiteral("graphicsView"));
-        graphicsView->setGeometry(QRect(590, 20, 710, 710));
         layoutWidget = new QWidget(centralWidget);
         layoutWidget->setObjectName(QStringLiteral("layoutWidget"));
         layoutWidget->setGeometry(QRect(0, 0, 471, 321));
@@ -315,6 +311,11 @@ public:
         pushButton_clean->setObjectName(QStringLiteral("pushButton_clean"));
         pushButton_clean->setGeometry(QRect(850, 760, 151, 41));
         pushButton_clean->setFont(font);
+        draw_label = new QLabel(centralWidget);
+        draw_label->setObjectName(QStringLiteral("draw_label"));
+        draw_label->setEnabled(true);
+        draw_label->setGeometry(QRect(590, 20, 710, 710));
+        draw_label->setStyleSheet(QStringLiteral("background-color: rgb(255, 255, 255);"));
         MainWindow->setCentralWidget(centralWidget);
         menuBar = new QMenuBar(MainWindow);
         menuBar->setObjectName(QStringLiteral("menuBar"));
@@ -373,6 +374,7 @@ public:
         label_8->setText(QApplication::translate("MainWindow", "\320\243\320\263\320\276\320\273:", nullptr));
         label_9->setText(QApplication::translate("MainWindow", "\320\224\320\273\320\270\320\275\320\260:", nullptr));
         pushButton_clean->setText(QApplication::translate("MainWindow", "\320\236\321\207\320\270\321\201\321\202\320\270\321\202\321\214 \320\262\321\201\320\265", nullptr));
+        draw_label->setText(QString());
         menu->setTitle(QApplication::translate("MainWindow", "\320\220\320\273\320\263\320\276\321\200\320\270\321\202\320\274\321\213 \321\200\320\270\321\201\320\276\320\262\320\260\320\275\320\270\321\217 \320\276\321\202\321\200\320\265\320\267\320\272\320\276\320\262", nullptr));
     } // retranslateUi
 

@@ -5,7 +5,7 @@
 #include <QPainter>
 #include <QtCore>
 #include <QtGui>
-#include <QGraphicsScene>
+#include <QPixmap>
 #include <QPen>
 
 namespace Ui {
@@ -34,8 +34,8 @@ private slots:
 
 private:
     Ui::MainWindow *ui;
-    QGraphicsScene *scene;
-    QPen *pen;
+    QPixmap *scene;
+    QPainter *painter;
     void change_colour(void);
 
 };
