@@ -2,6 +2,8 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+#include <QPainter>
+#include <QPixmap>
 
 namespace Ui {
 class MainWindow;
@@ -15,8 +17,15 @@ public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
 
+
 private slots:
-    void clean_clicked();
+    void on_pushButton_drawonecir_clicked();
+
+    void on_pushButton_drawmanycir_clicked();
+
+    void on_pushButton_drawoneel_clicked();
+
+    void on_pushButton_drawmanyel_clicked();
 
 private:
     Ui::MainWindow *ui;
