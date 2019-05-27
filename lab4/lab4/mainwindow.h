@@ -27,6 +27,8 @@ private slots:
 
     void on_pushButton_drawmanyel_clicked();
 
+    void on_pushButton_clean_clicked();
+
 private:
     Ui::MainWindow *ui;
     QPixmap *scene;

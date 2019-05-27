@@ -30,23 +30,23 @@ MainWindow::~MainWindow()
 void MainWindow::change_colour()
 {
     switch (ui->BackgroundColourcomboBox->currentIndex()){
-    case 1:
-        ui->draw_label->setStyleSheet("QLabel { background-color : black; }");
-        break;
     case 0:
         ui->draw_label->setStyleSheet("QLabel { background-color : white; }");
         break;
-    case 3:
-        ui->draw_label->setStyleSheet("QLabel { background-color : red; }");
-        break;
-    case 5:
-        ui->draw_label->setStyleSheet("QLabel { background-color : green; }");
+    case 1:
+        ui->draw_label->setStyleSheet("QLabel { background-color : black; }");
         break;
     case 2:
         ui->draw_label->setStyleSheet("QLabel { background-color : yellow; }");
         break;
+    case 3:
+        ui->draw_label->setStyleSheet("QLabel { background-color : red; }");
+        break;
     case 4:
         ui->draw_label->setStyleSheet("QLabel { background-color : blue; }");
+        break;
+    case 5:
+        ui->draw_label->setStyleSheet("QLabel { background-color : green; }");
         break;
     default:
         break;
@@ -66,10 +66,10 @@ void MainWindow::change_colour()
         painter->setPen(QColor(Qt::red));
         break;
     case 4:
-        painter->setPen(QColor(Qt::green));
+        painter->setPen(QColor(Qt::blue));
         break;
     case 5:
-        painter->setPen(QColor(Qt::blue));
+        painter->setPen(QColor(Qt::green));
         break;
     default: break;
     }
@@ -101,15 +101,15 @@ void MainWindow::on_pushButton_drawonecir_clicked()
             }
             if (ui->radioButton_br->isChecked())
             {
-
+                draw_circle_br(xc, yc, r, *painter);
             }
             if (ui->radioButton_srt->isChecked())
             {
-
+                draw_circle_srt(xc, yc, r, *painter);
             }
             if (ui->radioButton_dll->isChecked())
             {
-
+                draw_circle_dll(xc, yc, r, *painter);
             }
             ui->draw_label->setPixmap(*scene);
         }
@@ -123,8 +123,8 @@ void MainWindow::on_pushButton_drawonecir_clicked()
 void MainWindow::on_pushButton_drawmanycir_clicked()
 {
     bool q1, q2, q3, q4, q5;
-    QString strxc = ui->lineEdit_xc1cir->text();
-    QString stryc = ui->lineEdit_yc1cir->text();
+    QString strxc = ui->lineEdit_xc2cir->text();
+    QString stryc = ui->lineEdit_yc2cir->text();
     QString strrbeg = ui->lineEdit_rbeg->text();
     QString strrend = ui->lineEdit_rend->text();
     QString strstep = ui->lineEdit_stepcir->text();
@@ -142,23 +142,23 @@ void MainWindow::on_pushButton_drawmanycir_clicked()
             change_colour();
             if (ui->radioButton_kan->isChecked())
             {
-
+                draw_many_circle(xc, yc, rbeg, rend, step, *painter, draw_circle_kan);
             }
             if (ui->radioButton_par->isChecked())
             {
-
+                draw_many_circle(xc, yc, rbeg, rend, step, *painter, draw_circle_par);
             }
             if (ui->radioButton_br->isChecked())
             {
-
+                draw_many_circle(xc, yc, rbeg, rend, step, *painter, draw_circle_br);
             }
             if (ui->radioButton_srt->isChecked())
             {
-
+                draw_many_circle(xc, yc, rbeg, rend, step, *painter, draw_circle_srt);
             }
             if (ui->radioButton_dll->isChecked())
             {
-
+                draw_many_circle(xc, yc, rbeg, rend, step, *painter, draw_circle_dll);
             }
             ui->draw_label->setPixmap(*scene);
         }
@@ -203,15 +203,15 @@ void MainWindow::on_pushButton_drawoneel_clicked()
             }
             if (ui->radioButton_br->isChecked())
             {
-
+                draw_ellipse_br(xc, yc, a, b, *painter);
             }
             if (ui->radioButton_srt->isChecked())
             {
-
+                draw_ellipse_srt(xc, yc, a, b, *painter);
             }
             if (ui->radioButton_dll->isChecked())
             {
-
+                draw_ellipse_dll(xc, yc, a, b, *painter);
             }
             ui->draw_label->setPixmap(*scene);
         }
@@ -246,23 +246,23 @@ void MainWindow::on_pushButton_drawmanyel_clicked()
             change_colour();
             if (ui->radioButton_kan->isChecked())
             {
-
+                draw_many_ellipse(xc, yc, abeg, bbeg, step, n, *painter, draw_ellipse_kan);
             }
             if (ui->radioButton_par->isChecked())
             {
-
+                draw_many_ellipse(xc, yc, abeg, bbeg, step, n, *painter, draw_ellipse_par);
             }
             if (ui->radioButton_br->isChecked())
             {
-
+                draw_many_ellipse(xc, yc, abeg, bbeg, step, n, *painter, draw_ellipse_br);
             }
             if (ui->radioButton_srt->isChecked())
             {
-
+                draw_many_ellipse(xc, yc, abeg, bbeg, step, n, *painter, draw_ellipse_srt);
             }
             if (ui->radioButton_dll->isChecked())
             {
-
+                draw_many_ellipse(xc, yc, abeg, bbeg, step, n, *painter, draw_ellipse_dll);
             }
             ui->draw_label->setPixmap(*scene);
         }
@@ -274,4 +274,16 @@ void MainWindow::on_pushButton_drawmanyel_clicked()
     }
     else
         QMessageBox::warning(this, "Ошибка!", "Введены неверные параметры, данные должны быть целыми!");
+}
+
+void MainWindow::on_pushButton_clean_clicked()
+{
+    ui->draw_label->setStyleSheet("QLabel { background-color : white; }");
+    delete painter;
+    delete scene;
+    scene = new QPixmap(710, 710);
+    scene->fill(QColor("transparent"));
+    painter = new QPainter(scene);
+    painter->setPen(Qt::black);
+    ui->draw_label->setPixmap(*scene);
 }
