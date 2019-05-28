@@ -20,25 +20,24 @@ public:
     void mousePressEvent(QMouseEvent *event);
 
 private slots:
-    void on_pushButton_clicked();
 
     void on_pushButton_clean_clicked();
 
     void on_pushButton_border_clicked();
 
-    void on_pushButton_background_clicked();
-
     void on_pushButton_fill_clicked();
 
     void on_pushButton_add_clicked();
+
+    void on_pushButton_clicked();
 
 private:
     Ui::MainWindow *ui;
     QPainter *painter;
     QPixmap *scene;
     QColor color_border;
-    QColor color_background;
     QColor color_fill;
+    QColor color_background;
 };
 
 #endif // MAINWINDOW_H

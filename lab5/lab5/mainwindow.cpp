@@ -1,18 +1,20 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include "proc.h"
-
+#include <windows.h>
+#include <QImage>
 #include <QColor>
 #include <QColorDialog>
 #include <QMessageBox>
+#include <QString>
 
 #define DIST 20
-#define XOFFSET 230
+#define XOFFSET 350
 #define YOFFSET 10
-#define SIZE 710
+#define SIZE 900
 
-extern point_t *head;
-extern point_t *tail;
+extern contur_t *head;
+extern contur_t *tail;
 
 
 MainWindow::MainWindow(QWidget *parent) :
@@ -20,11 +22,11 @@ MainWindow::MainWindow(QWidget *parent) :
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
-    ui->draw_label->setPalette(color_background);
     ui->draw_label->setMouseTracking(true);
     this->setMouseTracking(true);
     scene = new QPixmap(SIZE, SIZE);
     scene->fill(QColor("transparent"));
+    scene->fill(QColor(Qt::white));
     painter = new QPainter(scene);
     painter->setPen(Qt::black);
     ui->draw_label->setPixmap(*scene);
@@ -32,7 +34,6 @@ MainWindow::MainWindow(QWidget *parent) :
 
     QPalette Pal(palette());
     Pal.setColor(QPalette::Background, Qt::black);
-
     ui->border_color->setAutoFillBackground(true);
     ui->border_color->setPalette(Pal);
 
@@ -40,13 +41,10 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->fill_color->setAutoFillBackground(true);
     ui->fill_color->setPalette(Pal);
 
-    Pal.setColor(QPalette::Background, Qt::white);
-    ui->background_color->setAutoFillBackground(true);
-    ui->background_color->setPalette(Pal);
-
-    color_background = QColor(Qt::white);
     color_border = QColor(Qt::black);
     color_fill = QColor(Qt::red);
+    color_background = QColor(Qt::white);
+    ui->radioButton_slow->setChecked(true);
 }
 
 MainWindow::~MainWindow()
@@ -58,11 +56,14 @@ MainWindow::~MainWindow()
 
 void MainWindow::on_pushButton_clean_clicked()
 {
-    ui->draw_label->setPalette(color_background);
+    free_conturs(head);
+    head = add_contur(nullptr);
+    tail = head;
     delete painter;
     delete scene;
     scene = new QPixmap(SIZE, SIZE);
     scene->fill(QColor("transparent"));
+    scene->fill(QColor(Qt::white));
     painter = new QPainter(scene);
     painter->setPen(Qt::black);
     ui->draw_label->setPixmap(*scene);
@@ -78,18 +79,6 @@ void MainWindow::on_pushButton_border_clicked()
     ui->border_color->show();
 }
 
-void MainWindow::on_pushButton_background_clicked()
-{
-    color_background = QColorDialog::getColor(Qt::white, this);
-    QPalette Pal(palette());
-    Pal.setColor(QPalette::Background, color_background);
-    ui->background_color->setAutoFillBackground(true);
-    ui->background_color->setPalette(Pal);
-    ui->background_color->show();
-    ui->draw_label->setAutoFillBackground(true);
-    ui->draw_label->setPalette(Pal);
-    ui->draw_label->show();
-}
 
 void MainWindow::on_pushButton_fill_clicked()
 {
@@ -112,18 +101,27 @@ void MainWindow::on_pushButton_add_clicked()
 
     if (q1 && q2)
     {
+        if (tail->zamknut)
+            tail = add_contur(tail);
         painter->setPen(color_border);
-        if (head != nullptr)
+        if (tail->head != nullptr)
         {
-            int xprev = tail->x;
-            int yprev = tail->y;
-            tail = add_point(x, y, tail);
+            int xprev = tail->tail->x;
+            int yprev = tail->tail->y;
+            tail->tail = add_point(x, y, tail->tail);
+            printf("(%d ; %d)\n", x, y);
             painter->drawLine(xprev, yprev, x, y);
+            if (tail->head->x == x && tail->head->y == y)
+            {
+                tail->zamknut = 1;
+                printf("---------------------");
+            }
         }
         else
         {
-            tail = add_point(x, y, tail);
-            head = tail;
+            tail->tail = add_point(x, y, tail->tail);
+            printf("(%d ; %d)\n", x, y);
+            tail->head = tail->tail;
             painter->drawPoint(x,y);
         }
         ui->draw_label->setPixmap(*scene);
@@ -143,35 +141,40 @@ void MainWindow::mousePressEvent(QMouseEvent *event)
     {
         x -= XOFFSET;
         y -= YOFFSET;
+        if (tail->zamknut)
+            tail = add_contur(tail);
         if (event->button() == Qt::LeftButton)
         {
             if (event->modifiers() == Qt::ShiftModifier)
             {
-                if (tail != nullptr)
+                if (tail->tail != nullptr)
                 {
-                    int xprev = tail->x;
-                    tail = add_point(x, tail->y, tail);
-                    painter->drawLine(xprev, tail->y, x, tail->y);
+                    int xprev = tail->tail->x;
+                    tail->tail = add_point(x, tail->tail->y, tail->tail);
+                    printf("(%d ; %d)\n", x, tail->tail->y);
+                    painter->drawLine(xprev, tail->tail->y, x, tail->tail->y);
                 }
                 else flag = 1;
             }
             else if (event->modifiers() == Qt::ControlModifier)
             {
-                if (tail != nullptr)
+                if (tail->tail != nullptr)
                 {
-                    int yprev = tail->y;
-                    tail = add_point(tail->x, y, tail);
-                    painter->drawLine(tail->x, yprev, tail->x, y);
+                    int yprev = tail->tail->y;
+                    tail->tail = add_point(tail->tail->x, y, tail->tail);
+                    printf("(%d ; %d)\n", tail->tail->x, y);
+                    painter->drawLine(tail->tail->x, yprev, tail->tail->x, y);
                 }
                 else flag = 1;
             }
             else
             {
-                if (tail != nullptr)
+                if (tail->tail != nullptr)
                 {
-                    int xprev = tail->x;
-                    int yprev = tail->y;
-                    tail = add_point(x, y, tail);
+                    int xprev = tail->tail->x;
+                    int yprev = tail->tail->y;
+                    tail->tail = add_point(x, y, tail->tail);
+                    printf("(%d ; %d)\n", x, y);
                     painter->drawLine(xprev, yprev, x, y);
                 }
                 else flag = 1;
@@ -179,20 +182,115 @@ void MainWindow::mousePressEvent(QMouseEvent *event)
 
             if (flag)
             {
-                tail = add_point(x, y, tail);
-                head = tail;
+                tail->tail = add_point(x, y, tail->tail);
+                printf("(%d ; %d)\n", x, y);
+                tail->head = tail->tail;
                 painter->drawPoint(x, y);
             }
         }
 
         if (event->button() == Qt::RightButton)
         {
-            if (head != nullptr && abs(x - head->x) <= DIST && abs(y - head->y) <= DIST)
+            if (tail->head != nullptr && abs(x - tail->head->x) <= DIST && abs(y - tail->head->y) <= DIST)
             {
-                painter->drawLine(head->x, head->y, tail->x, tail->y);
-                tail = add_point(head->x, head->y, tail);
+                painter->drawLine(tail->head->x, tail->head->y, tail->tail->x, tail->tail->y);
+                tail->tail = add_point(tail->head->x, tail->head->y, tail->tail);
+                printf("(%d ; %d)\n", tail->tail->x, tail->tail->y);
             }
+            tail->zamknut = 1;
+            printf("----------------------\n");
         }
         ui->draw_label->setPixmap(*scene);
+    }
+}
+
+void MainWindow::on_pushButton_clicked()
+{
+    int xmin = head->head->x;
+    int xmax = head->head->x;
+    int ymin = head->head->y;
+    int ymax = head->head->y;
+    bool flag = ui->radioButton_slow->isChecked();
+
+    for (point_t *ptr = head->head->next; ptr != nullptr; ptr = ptr->next)
+    {
+        if (ptr->x > xmax)
+            xmax = ptr->x;
+        if (ptr->x < xmin)
+            xmin = ptr->x;
+        if (ptr->y > ymax)
+            ymax = ptr->y;
+        if (ptr->y < ymin)
+            ymin = ptr->y;
+    }
+
+    int xsep = (xmin + xmax) / 2;
+
+    painter->setPen(Qt::green);
+    painter->drawLine(xsep, ymin - 10, xsep, ymax + 10);
+    ui->draw_label->setPixmap(*scene);
+
+    for (contur_t *cntr = head; cntr != nullptr; cntr = cntr->next)
+    {
+        for (point_t *start = cntr->head; start != nullptr; start = start->next)
+        {
+            point_t *end = start->next ? start->next : cntr->head;
+            double k;
+            if (end->x - start->x != 0)
+                k = (double) (end->y - start->y) / (end->x - start->x);
+            else k = 0;
+            double b = start->y - k * start->x;
+            int ystart = 0, yend = 0;
+            if (start->y < end->y)
+            {
+                ystart = start->y;
+                yend = end->y;
+            }
+            if (start->y > end->y)
+            {
+                ystart = end->y;
+                yend = start->y;
+            }
+            for (int ycur = ystart; ycur < yend; ycur++)
+            {
+                QImage img = scene->toImage();
+                int xcur;
+                if (k != 0)
+                    xcur = (ycur - b) /  k;
+                else xcur = start->x;
+                if (xcur < xsep)
+                    for (int xx = xcur + 1; xx < xsep; xx++)
+                    {
+
+                        QColor color = img.pixelColor(xx, ycur);
+                        if (color == color_background)
+                            painter->setPen(color_fill);
+                        else
+                            painter->setPen(color_background);
+                        painter->drawPoint(xx, ycur);
+                    }
+
+                if (xcur > xsep)
+                {
+                    for (int xx = xsep + 1; xx < xcur; xx++)
+                    {
+                        QColor color = img.pixelColor(xx, ycur);
+                        if (color == color_background)
+                            painter->setPen(color_fill);
+                        else
+                        {
+                            if (color == color_fill)
+                                painter->setPen(color_background);
+                            else
+                                painter->setPen(color_border);
+                        }
+                        painter->drawPoint(xx, ycur);
+                    }
+                }
+                ui->draw_label->setPixmap(*scene);
+                if (flag)
+                    repaint();
+            }
+        }
     }
 }
