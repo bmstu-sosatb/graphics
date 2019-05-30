@@ -23,6 +23,7 @@
 #include <QtWidgets/QPushButton>
 #include <QtWidgets/QRadioButton>
 #include <QtWidgets/QStatusBar>
+#include <QtWidgets/QTextEdit>
 #include <QtWidgets/QToolBar>
 #include <QtWidgets/QVBoxLayout>
 #include <QtWidgets/QWidget>
@@ -44,17 +45,19 @@ public:
     QLabel *label_2;
     QLineEdit *lineEdit_y;
     QPushButton *pushButton_add;
-    QWidget *widget;
+    QWidget *layoutWidget1;
     QGridLayout *gridLayout;
     QLabel *border_color;
     QPushButton *pushButton_border;
     QLabel *fill_color;
     QPushButton *pushButton_fill;
-    QWidget *widget1;
+    QWidget *layoutWidget2;
     QVBoxLayout *verticalLayout_2;
     QRadioButton *radioButton_slow;
     QRadioButton *radioButton_fast;
     QPushButton *pushButton;
+    QTextEdit *textEdit;
+    QLabel *label_3;
     QMenuBar *menuBar;
     QToolBar *mainToolBar;
     QStatusBar *statusBar;
@@ -131,62 +134,69 @@ public:
 
         verticalLayout->addWidget(pushButton_add);
 
-        widget = new QWidget(centralWidget);
-        widget->setObjectName(QStringLiteral("widget"));
-        widget->setGeometry(QRect(1, 169, 191, 91));
-        gridLayout = new QGridLayout(widget);
+        layoutWidget1 = new QWidget(centralWidget);
+        layoutWidget1->setObjectName(QStringLiteral("layoutWidget1"));
+        layoutWidget1->setGeometry(QRect(1, 169, 191, 91));
+        gridLayout = new QGridLayout(layoutWidget1);
         gridLayout->setSpacing(6);
         gridLayout->setContentsMargins(11, 11, 11, 11);
         gridLayout->setObjectName(QStringLiteral("gridLayout"));
         gridLayout->setContentsMargins(0, 0, 0, 0);
-        border_color = new QLabel(widget);
+        border_color = new QLabel(layoutWidget1);
         border_color->setObjectName(QStringLiteral("border_color"));
 
         gridLayout->addWidget(border_color, 0, 0, 1, 1);
 
-        pushButton_border = new QPushButton(widget);
+        pushButton_border = new QPushButton(layoutWidget1);
         pushButton_border->setObjectName(QStringLiteral("pushButton_border"));
         pushButton_border->setFont(font);
 
         gridLayout->addWidget(pushButton_border, 0, 1, 1, 1);
 
-        fill_color = new QLabel(widget);
+        fill_color = new QLabel(layoutWidget1);
         fill_color->setObjectName(QStringLiteral("fill_color"));
 
         gridLayout->addWidget(fill_color, 1, 0, 1, 1);
 
-        pushButton_fill = new QPushButton(widget);
+        pushButton_fill = new QPushButton(layoutWidget1);
         pushButton_fill->setObjectName(QStringLiteral("pushButton_fill"));
         pushButton_fill->setFont(font);
 
         gridLayout->addWidget(pushButton_fill, 1, 1, 1, 1);
 
-        widget1 = new QWidget(centralWidget);
-        widget1->setObjectName(QStringLiteral("widget1"));
-        widget1->setGeometry(QRect(-10, 300, 341, 121));
-        verticalLayout_2 = new QVBoxLayout(widget1);
+        layoutWidget2 = new QWidget(centralWidget);
+        layoutWidget2->setObjectName(QStringLiteral("layoutWidget2"));
+        layoutWidget2->setGeometry(QRect(0, 320, 341, 121));
+        verticalLayout_2 = new QVBoxLayout(layoutWidget2);
         verticalLayout_2->setSpacing(6);
         verticalLayout_2->setContentsMargins(11, 11, 11, 11);
         verticalLayout_2->setObjectName(QStringLiteral("verticalLayout_2"));
         verticalLayout_2->setContentsMargins(0, 0, 0, 0);
-        radioButton_slow = new QRadioButton(widget1);
+        radioButton_slow = new QRadioButton(layoutWidget2);
         radioButton_slow->setObjectName(QStringLiteral("radioButton_slow"));
         radioButton_slow->setFont(font);
 
         verticalLayout_2->addWidget(radioButton_slow);
 
-        radioButton_fast = new QRadioButton(widget1);
+        radioButton_fast = new QRadioButton(layoutWidget2);
         radioButton_fast->setObjectName(QStringLiteral("radioButton_fast"));
         radioButton_fast->setFont(font);
 
         verticalLayout_2->addWidget(radioButton_fast);
 
-        pushButton = new QPushButton(widget1);
+        pushButton = new QPushButton(layoutWidget2);
         pushButton->setObjectName(QStringLiteral("pushButton"));
         pushButton->setFont(font);
 
         verticalLayout_2->addWidget(pushButton);
 
+        textEdit = new QTextEdit(centralWidget);
+        textEdit->setObjectName(QStringLiteral("textEdit"));
+        textEdit->setGeometry(QRect(20, 570, 141, 211));
+        label_3 = new QLabel(centralWidget);
+        label_3->setObjectName(QStringLiteral("label_3"));
+        label_3->setGeometry(QRect(20, 550, 81, 16));
+        label_3->setFont(font);
         MainWindow->setCentralWidget(centralWidget);
         menuBar = new QMenuBar(MainWindow);
         menuBar->setObjectName(QStringLiteral("menuBar"));
@@ -219,6 +229,7 @@ public:
         radioButton_slow->setText(QApplication::translate("MainWindow", "\320\241 \320\267\320\260\320\264\320\265\321\200\320\266\320\272\320\276\320\271 \320\262\321\200\320\265\320\274\320\265\320\275\320\270", nullptr));
         radioButton_fast->setText(QApplication::translate("MainWindow", "\320\221\320\265\320\267 \320\267\320\260\320\264\320\265\321\200\320\266\320\272\320\270 \320\262\321\200\320\265\320\274\320\265\320\275\320\270", nullptr));
         pushButton->setText(QApplication::translate("MainWindow", "\320\227\320\260\320\272\321\200\320\260\321\201\320\270\321\202\321\214", nullptr));
+        label_3->setText(QApplication::translate("MainWindow", "\320\242\320\236\320\247\320\232\320\230:", nullptr));
     } // retranslateUi
 
 };

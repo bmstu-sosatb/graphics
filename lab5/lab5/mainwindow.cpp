@@ -56,6 +56,7 @@ MainWindow::~MainWindow()
 
 void MainWindow::on_pushButton_clean_clicked()
 {
+    ui->textEdit->clear();
     free_conturs(head);
     head = add_contur(nullptr);
     tail = head;
@@ -109,18 +110,18 @@ void MainWindow::on_pushButton_add_clicked()
             int xprev = tail->tail->x;
             int yprev = tail->tail->y;
             tail->tail = add_point(x, y, tail->tail);
-            printf("(%d ; %d)\n", x, y);
+            ui->textEdit->append(QString("(%1;%2)").arg(x).arg(y));
             painter->drawLine(xprev, yprev, x, y);
             if (tail->head->x == x && tail->head->y == y)
             {
                 tail->zamknut = 1;
-                printf("---------------------");
+                ui->textEdit->append(QString("--------"));
             }
         }
         else
         {
             tail->tail = add_point(x, y, tail->tail);
-            printf("(%d ; %d)\n", x, y);
+            ui->textEdit->append(QString("(%1;%2)").arg(x).arg(y));
             tail->head = tail->tail;
             painter->drawPoint(x,y);
         }
@@ -151,7 +152,7 @@ void MainWindow::mousePressEvent(QMouseEvent *event)
                 {
                     int xprev = tail->tail->x;
                     tail->tail = add_point(x, tail->tail->y, tail->tail);
-                    printf("(%d ; %d)\n", x, tail->tail->y);
+                    ui->textEdit->append(QString("(%1;%2)").arg(x).arg(y));
                     painter->drawLine(xprev, tail->tail->y, x, tail->tail->y);
                 }
                 else flag = 1;
@@ -162,7 +163,7 @@ void MainWindow::mousePressEvent(QMouseEvent *event)
                 {
                     int yprev = tail->tail->y;
                     tail->tail = add_point(tail->tail->x, y, tail->tail);
-                    printf("(%d ; %d)\n", tail->tail->x, y);
+                    ui->textEdit->append(QString("(%1;%2)").arg(x).arg(y));
                     painter->drawLine(tail->tail->x, yprev, tail->tail->x, y);
                 }
                 else flag = 1;
@@ -174,7 +175,7 @@ void MainWindow::mousePressEvent(QMouseEvent *event)
                     int xprev = tail->tail->x;
                     int yprev = tail->tail->y;
                     tail->tail = add_point(x, y, tail->tail);
-                    printf("(%d ; %d)\n", x, y);
+                    ui->textEdit->append(QString("(%1;%2)").arg(x).arg(y));
                     painter->drawLine(xprev, yprev, x, y);
                 }
                 else flag = 1;
@@ -183,7 +184,7 @@ void MainWindow::mousePressEvent(QMouseEvent *event)
             if (flag)
             {
                 tail->tail = add_point(x, y, tail->tail);
-                printf("(%d ; %d)\n", x, y);
+                ui->textEdit->append(QString("(%1;%2)").arg(x).arg(y));
                 tail->head = tail->tail;
                 painter->drawPoint(x, y);
             }
@@ -195,10 +196,10 @@ void MainWindow::mousePressEvent(QMouseEvent *event)
             {
                 painter->drawLine(tail->head->x, tail->head->y, tail->tail->x, tail->tail->y);
                 tail->tail = add_point(tail->head->x, tail->head->y, tail->tail);
-                printf("(%d ; %d)\n", tail->tail->x, tail->tail->y);
+                ui->textEdit->append(QString("(%1;%2)").arg(tail->head->x).arg(tail->head->y));
             }
             tail->zamknut = 1;
-            printf("----------------------\n");
+            ui->textEdit->append(QString("--------"));
         }
         ui->draw_label->setPixmap(*scene);
     }
@@ -259,30 +260,43 @@ void MainWindow::on_pushButton_clicked()
                     xcur = (ycur - b) /  k;
                 else xcur = start->x;
                 if (xcur < xsep)
-                    for (int xx = xcur + 1; xx < xsep; xx++)
+                    for (int xx = xcur; xx < xsep; xx++)
                     {
 
                         QColor color = img.pixelColor(xx, ycur);
                         if (color == color_background)
                             painter->setPen(color_fill);
                         else
-                            painter->setPen(color_background);
+                        {
+                            if (color == color_border)
+                                painter->setPen(color_border);
+                            else
+                            {
+                                if (color == color_fill)
+                                    painter->setPen(color_background);
+                                else painter->setPen(color_fill);
+                            }
+                        }
                         painter->drawPoint(xx, ycur);
                     }
 
                 if (xcur > xsep)
                 {
-                    for (int xx = xsep + 1; xx < xcur; xx++)
+                    for (int xx = xsep + 1; xx <= xcur; xx++)
                     {
                         QColor color = img.pixelColor(xx, ycur);
                         if (color == color_background)
                             painter->setPen(color_fill);
                         else
                         {
-                            if (color == color_fill)
-                                painter->setPen(color_background);
-                            else
+                            if (color == color_border)
                                 painter->setPen(color_border);
+                            else
+                            {
+                                if (color == color_fill)
+                                    painter->setPen(color_background);
+                                else painter->setPen(color_fill);
+                            }
                         }
                         painter->drawPoint(xx, ycur);
                     }
