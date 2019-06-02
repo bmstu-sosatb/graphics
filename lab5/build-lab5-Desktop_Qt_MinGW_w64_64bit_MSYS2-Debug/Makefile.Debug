@@ -139,7 +139,8 @@ debug/main.o: ../lab5/main.cpp ../lab5/mainwindow.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o debug\main.o ..\lab5\main.cpp
 
 debug/mainwindow.o: ../lab5/mainwindow.cpp ../lab5/mainwindow.h \
-		ui_mainwindow.h
+		ui_mainwindow.h \
+		../lab5/proc.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o debug\mainwindow.o ..\lab5\mainwindow.cpp
 
 debug/proc.o: ../lab5/proc.cpp ../lab5/proc.h

@@ -1,6 +1,5 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
-#include "proc.h"
 #include <windows.h>
 #include <QImage>
 #include <QColor>
@@ -15,7 +14,8 @@
 
 extern contur_t *head;
 extern contur_t *tail;
-
+int xzatr = -1;
+int yzatr = -1;
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -170,15 +170,25 @@ void MainWindow::mousePressEvent(QMouseEvent *event)
             }
             else
             {
-                if (tail->tail != nullptr)
+                if (event->modifiers() == Qt::AltModifier)
                 {
-                    int xprev = tail->tail->x;
-                    int yprev = tail->tail->y;
-                    tail->tail = add_point(x, y, tail->tail);
-                    ui->textEdit->append(QString("(%1;%2)").arg(x).arg(y));
-                    painter->drawLine(xprev, yprev, x, y);
+                    xzatr = x;
+                    yzatr = y;
+                    ui->lineEdit_xzatr->setText(QString("%1").arg(x));
+                    ui->lineEdit_yzatr->setText(QString("%1").arg(y));
                 }
-                else flag = 1;
+                else
+                {
+                    if (tail->tail != nullptr)
+                    {
+                        int xprev = tail->tail->x;
+                        int yprev = tail->tail->y;
+                        tail->tail = add_point(x, y, tail->tail);
+                        ui->textEdit->append(QString("(%1;%2)").arg(x).arg(y));
+                        painter->drawLine(xprev, yprev, x, y);
+                    }
+                    else flag = 1;
+                }
             }
 
             if (flag)
@@ -204,104 +214,138 @@ void MainWindow::mousePressEvent(QMouseEvent *event)
 
 void MainWindow::on_pushButton_clicked()
 {
-    int xmin = head->head->x;
-    int xmax = head->head->x;
-    int ymin = head->head->y;
-    int ymax = head->head->y;
-    bool flag = ui->radioButton_slow->isChecked();
-
-    for (point_t *ptr = head->head->next; ptr != nullptr; ptr = ptr->next)
+    if (xzatr < 0 || yzatr < 0)
+        QMessageBox::warning(this, "Ошибка", "Вы не ввели затравочный пиксель!");
+    else
     {
-        if (ptr->x > xmax)
-            xmax = ptr->x;
-        if (ptr->x < xmin)
-            xmin = ptr->x;
-        if (ptr->y > ymax)
-            ymax = ptr->y;
-        if (ptr->y < ymin)
-            ymin = ptr->y;
-    }
-
-    int xsep = (xmin + xmax) / 2;
-
-    painter->setPen(Qt::green);
-    painter->drawLine(xsep, ymin - 10, xsep, ymax + 10);
-    ui->draw_label->setPixmap(*scene);
-
-    for (contur_t *cntr = head; cntr != nullptr; cntr = cntr->next)
-    {
-        for (point_t *start = cntr->head; start != nullptr; start = start->next)
+        stack_t *top = push(nullptr, xzatr, yzatr);
+        bool speed_flag = ui->radioButton_slow->isChecked();
+        while (!(stack_is_empty(top)))
         {
-            point_t *end = start->next ? start->next : cntr->head;
-            double k;
-            if (end->x - start->x != 0)
-                k = (double) (end->y - start->y) / (end->x - start->x);
-            else k = 0;
-            double b = start->y - k * start->x;
-            int ystart = 0, yend = 0;
-            if (start->y < end->y)
+            int xz, yz;
+            top = pop(top, &xz, &yz);
+            int xleft = xz, xright = xz;
+            QImage img = scene->toImage();
+            QColor color = img.pixelColor(xleft - 1, yz);
+            painter->setPen(color_fill);
+            painter->drawPoint(xz, yz);
+            while (color != color_border)
             {
-                ystart = start->y;
-                yend = end->y;
+                xleft--;
+                painter->drawPoint(xleft, yz);
+                color = img.pixelColor(xleft - 1, yz);
             }
-            if (start->y > end->y)
+            color = img.pixelColor(xright + 1, yz);
+            while (color != color_border)
             {
-                ystart = end->y;
-                yend = start->y;
+                xright++;
+                painter->drawPoint(xright, yz);
+                color = img.pixelColor(xright + 1, yz);
             }
-            for (int ycur = ystart; ycur < yend; ycur++)
+
+            int y = yz + 1;
+            int x = xleft;
+            int flag;
+            M0:
+            if (x <= xright)
             {
-                QImage img = scene->toImage();
-                int xcur;
-                if (k != 0)
-                    xcur = (ycur - b) /  k;
-                else xcur = start->x;
-                if (xcur < xsep)
-                    for (int xx = xcur; xx < xsep; xx++)
-                    {
-
-                        QColor color = img.pixelColor(xx, ycur);
-                        if (color == color_background)
-                            painter->setPen(color_fill);
-                        else
-                        {
-                            if (color == color_border)
-                                painter->setPen(color_border);
-                            else
-                            {
-                                if (color == color_fill)
-                                    painter->setPen(color_background);
-                                else painter->setPen(color_fill);
-                            }
-                        }
-                        painter->drawPoint(xx, ycur);
-                    }
-
-                if (xcur > xsep)
+                flag = 0;
+                M1:
+                color = img.pixelColor(x, y);
+                if (color != color_border)
                 {
-                    for (int xx = xsep + 1; xx <= xcur; xx++)
+                    if (color != color_fill)
                     {
-                        QColor color = img.pixelColor(xx, ycur);
-                        if (color == color_background)
-                            painter->setPen(color_fill);
+                        if (x <= xright)
+                        {
+                            flag = 1;
+                            x++;
+                            goto M1;
+                         }
+                        else goto M2;
+                    }
+                    else goto M2;
+                }
+                else
+                {
+                    M2:
+                    if (flag == 1)
+                    {
+                        if (x == xright)
+                        {
+                            color = img.pixelColor(x, y);
+                            if (color != color_border)
+                            {
+                                if (color != color_fill)
+                                {
+                                    top = push(top, x, y);
+                                    goto M4;
+                                }
+                                else goto M3;
+                            }
+                            else goto M3;
+                        }
                         else
                         {
-                            if (color == color_border)
-                                painter->setPen(color_border);
-                            else
+                            M3:
+                            top = push(top, x - 1, y);
+                            goto M4;
+                        }
+                        M4:
+                        flag = 0;
+                        int xt = x;
+                        M5:
+                        color = img.pixelColor(x, y);
+                        if (color == color_border)
+                        {
+                            M6:
+                            if (x < xright)
                             {
-                                if (color == color_fill)
-                                    painter->setPen(color_background);
-                                else painter->setPen(color_fill);
+                                x++;
+                                goto M5;
                             }
                         }
-                        painter->drawPoint(xx, ycur);
+                        else
+                        {
+                            if (color == color_fill)
+                                goto M6;
+                            else
+                            {
+                                if (x == xt)
+                                    x++;
+                                else goto M0;
+                            }
+                        }
                     }
+                    else goto M4;
                 }
-                ui->draw_label->setPixmap(*scene);
-                if (flag)
-                    repaint();
             }
+            if (y == yz + 1)
+            {
+                x = xleft;
+                y = yz - 1;
+                goto M0;
+            }
+            ui->draw_label->setPixmap(*scene);
+            if (speed_flag)
+                repaint();
         }
     }
+}
+
+void MainWindow::on_pushButton_addzatr_clicked()
+{
+    bool q1, q2;
+    QString strx = ui->lineEdit_xzatr->text();
+    QString stry = ui->lineEdit_yzatr->text();
+
+    int x = strx.toInt(&q1);
+    int y = stry.toInt(&q2);
+
+    if (q1 && q2)
+    {
+        xzatr = x;
+        yzatr = y;
+    }
+    else QMessageBox::warning(this, "Ошибка ввода", "Координаты должны быть целочисленными!");
 }
