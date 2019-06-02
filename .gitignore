@@ -2,3 +2,4 @@
 **/*.o
 **/*.creator.user.*
 **/__pycache__
+**/build-lab*
