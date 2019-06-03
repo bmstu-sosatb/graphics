@@ -26,21 +26,23 @@ private slots:
 
     void on_pushButton_border_clicked();
 
-    void on_pushButton_fill_clicked();
-
     void on_pushButton_add_clicked();
 
     void on_pushButton_clicked();
 
-    void on_pushButton_addzatr_clicked();
+    void on_pushButton_lines_clicked();
+
+    void on_pushButton_result_clicked();
+
+    void on_pushButton_otcekatel_clicked();
 
 private:
     Ui::MainWindow *ui;
     QPainter *painter;
     QPixmap *scene;
     QColor color_border;
-    QColor color_fill;
-    QColor color_background;
+    QColor color_lines;
+    QColor color_result;
 };
 
 #endif // MAINWINDOW_H

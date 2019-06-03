@@ -1,76 +1,42 @@
 #include "proc.h"
 #include <windows.h>
 
-
-contur_t *head = add_contur(nullptr);
-contur_t *tail = head;
-
-point_t* add_point(int x, int y, point_t *tail)
+otcekatel_t* create_otcekatel(int xleft, int xright, int yleft, int yright)
 {
-    point_t* p = new point_t;
-    p->x = x;
-    p->y = y;
-    p->next = nullptr;
-    if (tail != nullptr)
-        tail->next = p;
-    return p;
+    otcekatel_t *o = new otcekatel_t;
+    o->xleft = xleft;
+    o->xright = xright;
+    o->yleft = yleft;
+    o->yright = yright;
+    return o;
 }
 
-void free_points(point_t *head)
+void free_otcekatel(otcekatel_t *otcek)
 {
-    point_t *next;
-    for (point_t *ptr = head; ptr != nullptr; ptr = next)
+    delete otcek;
+    otcek = nullptr;
+}
+
+lines_t* add_point(int xbeg, int ybeg, int xend, int yend, lines_t *tail)
+{
+    lines_t* l = new lines_t;
+    l->xbeg = xbeg;
+    l->ybeg = ybeg;
+    l->xend = xend;
+    l->yend = yend;
+    l->next = nullptr;
+    if (tail != nullptr)
+        tail->next = l;
+    return l;
+}
+
+void free_lines(lines_t *head)
+{
+    lines_t *next;
+    for (lines_t *ptr = head; ptr != nullptr; ptr = next)
     {
         next = ptr->next;
         delete ptr;
     }
-}
-
-contur_t* add_contur(contur_t *tail)
-{
-    contur_t* c = new contur_t;
-    c->head = nullptr;
-    c->tail = nullptr;
-    c->zamknut = 0;
-    c->next = nullptr;
-    if (tail != nullptr)
-        tail->next = c;
-    return c;
-}
-
-void free_conturs(contur_t *head)
-{
-    contur_t *next;
-    for (contur_t *ptr = head; next != nullptr; ptr = next)
-    {
-        next = ptr->next;
-        free_points(ptr->head);
-        delete ptr;
-    }
-}
-
-bool stack_is_empty(stack_t *top)
-{
-    if (top)
-        return false;
-    return true;
-}
-
-stack_t* push(stack_t *top, int x, int y)
-{
-    stack_t *elem = new stack_t;
-    elem->x = x;
-    elem->y = y;
-    elem->prev = top;
-    return elem;
-}
-
-stack_t* pop(stack_t *top, int *x, int *y)
-{
-    *x = top->x;
-    *y = top->y;
-    stack_t *prev = top->prev;
-    delete top;
-    return prev;
 }
 

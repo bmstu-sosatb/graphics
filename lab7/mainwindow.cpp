@@ -12,10 +12,10 @@
 #define YOFFSET 10
 #define SIZE 900
 
-extern contur_t *head;
-extern contur_t *tail;
-int xzatr = -1;
-int yzatr = -1;
+otcekatel_t *otcek = nullptr;
+lines_t *head = nullptr;
+lines_t *tail = head;
+
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -38,13 +38,12 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->border_color->setPalette(Pal);
 
     Pal.setColor(QPalette::Background, Qt::red);
-    ui->fill_color->setAutoFillBackground(true);
-    ui->fill_color->setPalette(Pal);
+    ui->lines_color->setAutoFillBackground(true);
+    ui->lines_color->setPalette(Pal);
 
     color_border = QColor(Qt::black);
-    color_fill = QColor(Qt::red);
-    color_background = QColor(Qt::white);
-    ui->radioButton_slow->setChecked(true);
+    color_lines = QColor(Qt::red);
+    color_result = QColor(Qt::green);
 }
 
 MainWindow::~MainWindow()
@@ -80,16 +79,48 @@ void MainWindow::on_pushButton_border_clicked()
     ui->border_color->show();
 }
 
-
-void MainWindow::on_pushButton_fill_clicked()
+void MainWindow::on_pushButton_lines_clicked()
 {
-    color_fill = QColorDialog::getColor(Qt::red, this);
+    color_lines = QColorDialog::getColor(Qt::red, this);
     QPalette Pal(palette());
-    Pal.setColor(QPalette::Background, color_fill);
-    ui->fill_color->setAutoFillBackground(true);
-    ui->fill_color->setPalette(Pal);
-    ui->fill_color->show();
+    Pal.setColor(QPalette::Background, color_lines);
+    ui->lines_color->setAutoFillBackground(true);
+    ui->lines_color->setPalette(Pal);
+    ui->lines_color->show();
 }
+
+void MainWindow::on_pushButton_result_clicked()
+{
+    color_result = QColorDialog::getColor(Qt::green, this);
+    QPalette Pal(palette());
+    Pal.setColor(QPalette::Background, color_result);
+    ui->result_color->setAutoFillBackground(true);
+    ui->result_color->setPalette(Pal);
+    ui->result_color->show();
+}
+
+void MainWindow::on_pushButton_otcekatel_clicked()
+{
+    bool q1, q2, q3, q4;
+    QString strxleft = ui->lineEdit_xleft->text();
+    QString strxright = ui->lineEdit_xright->text();
+    QString stryleft = ui->lineEdit_yleft->text();
+    QString stryright = ui->lineEdit_yright->text();
+
+    int xleft = strxleft.toInt(&q1);
+    int xright = strxright.toInt(&q2);
+    int yleft = stryleft.toInt(&q3);
+    int yright = stryright.toInt(&q4);
+
+    if (q1 && q2 && q3 && q4)
+    {
+
+    }
+}
+
+
+
+
 
 void MainWindow::on_pushButton_add_clicked()
 {
@@ -333,19 +364,4 @@ void MainWindow::on_pushButton_clicked()
     }
 }
 
-void MainWindow::on_pushButton_addzatr_clicked()
-{
-    bool q1, q2;
-    QString strx = ui->lineEdit_xzatr->text();
-    QString stry = ui->lineEdit_yzatr->text();
 
-    int x = strx.toInt(&q1);
-    int y = stry.toInt(&q2);
-
-    if (q1 && q2)
-    {
-        xzatr = x;
-        yzatr = y;
-    }
-    else QMessageBox::warning(this, "Ошибка ввода", "Координаты должны быть целочисленными!");
-}
