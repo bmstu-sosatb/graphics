@@ -7,7 +7,7 @@
 #include <QMessageBox>
 #include <QString>
 
-#define DIST 20
+#define DIST 40
 #define XOFFSET 350
 #define YOFFSET 10
 #define SIZE 900
@@ -15,6 +15,7 @@
 otcekatel_t *otcek = nullptr;
 lines_t *head = nullptr;
 lines_t *tail = head;
+double eps = 1;
 
 
 MainWindow::MainWindow(QWidget *parent) :
@@ -41,9 +42,15 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->lines_color->setAutoFillBackground(true);
     ui->lines_color->setPalette(Pal);
 
+    Pal.setColor(QPalette::Background, Qt::green);
+    ui->result_color->setAutoFillBackground(true);
+    ui->result_color->setPalette(Pal);
+
     color_border = QColor(Qt::black);
     color_lines = QColor(Qt::red);
     color_result = QColor(Qt::green);
+
+    ui->lineEdit_eps->setText(QString("%1").arg(eps));
 }
 
 MainWindow::~MainWindow()
@@ -55,10 +62,11 @@ MainWindow::~MainWindow()
 
 void MainWindow::on_pushButton_clean_clicked()
 {
-    ui->textEdit->clear();
-    free_conturs(head);
-    head = add_contur(nullptr);
+    free_lines(head);
+    head = nullptr;
     tail = head;
+    free_otcekatel(otcek);
+    otcek = nullptr;
     delete painter;
     delete scene;
     scene = new QPixmap(SIZE, SIZE);
@@ -104,264 +112,186 @@ void MainWindow::on_pushButton_otcekatel_clicked()
     bool q1, q2, q3, q4;
     QString strxleft = ui->lineEdit_xleft->text();
     QString strxright = ui->lineEdit_xright->text();
-    QString stryleft = ui->lineEdit_yleft->text();
-    QString stryright = ui->lineEdit_yright->text();
+    QString strylow = ui->lineEdit_ylow->text();
+    QString stryhigh = ui->lineEdit_yhigh->text();
 
     int xleft = strxleft.toInt(&q1);
     int xright = strxright.toInt(&q2);
-    int yleft = stryleft.toInt(&q3);
-    int yright = stryright.toInt(&q4);
+    int ylow = strylow.toInt(&q3);
+    int yhigh = stryhigh.toInt(&q4);
 
     if (q1 && q2 && q3 && q4)
     {
-
-    }
-}
-
-
-
-
-
-void MainWindow::on_pushButton_add_clicked()
-{
-    bool q1, q2;
-    QString strx = ui->lineEdit_x->text();
-    QString stry = ui->lineEdit_y->text();
-
-    int x = strx.toInt(&q1);
-    int y = stry.toInt(&q2);
-
-    if (q1 && q2)
-    {
-        if (tail->zamknut)
-            tail = add_contur(tail);
-        painter->setPen(color_border);
-        if (tail->head != nullptr)
+        if (xleft > xright)
         {
-            int xprev = tail->tail->x;
-            int yprev = tail->tail->y;
-            tail->tail = add_point(x, y, tail->tail);
-            ui->textEdit->append(QString("(%1;%2)").arg(x).arg(y));
-            painter->drawLine(xprev, yprev, x, y);
-            if (tail->head->x == x && tail->head->y == y)
-            {
-                tail->zamknut = 1;
-                ui->textEdit->append(QString("--------"));
-            }
+            swap(&xleft, &xright);
+            ui->lineEdit_xleft->setText(strxright);
+            ui->lineEdit_xright->setText(strxleft);
         }
+        if (ylow > yhigh)
+        {
+            swap(&ylow, &yhigh);
+            ui->lineEdit_yhigh->setText(strylow);
+            ui->lineEdit_ylow->setText(stryhigh);
+        }
+        if (!otcek)
+            otcek = create_otcekatel(xleft, xright, ylow, yhigh);
         else
         {
-            tail->tail = add_point(x, y, tail->tail);
-            ui->textEdit->append(QString("(%1;%2)").arg(x).arg(y));
-            tail->head = tail->tail;
-            painter->drawPoint(x,y);
+            otcek->xleft = xleft;
+            otcek->xright = xright;
+            otcek->ylow = ylow;
+            otcek->yhigh = yhigh;
         }
+        painter->setPen(color_border);
+        painter->drawLine(xleft, ylow, xleft, yhigh);
+        painter->drawLine(xleft, ylow, xright, ylow);
+        painter->drawLine(xleft, yhigh, xright, yhigh);
+        painter->drawLine(xright, ylow, xright, yhigh);
         ui->draw_label->setPixmap(*scene);
     }
     else
         QMessageBox::warning(this, "Ошибка ввода", "Координаты должны быть целочисленными!");
-
 }
+
+void MainWindow::on_pushButton_eps_clicked()
+{
+    bool q;
+    QString streps = ui->lineEdit_eps->text();
+
+    double deps = streps.toDouble(&q);
+    if (q)
+        eps = deps;
+    else
+        QMessageBox::warning(this, "Ошибка ввода", "Точность должна быть задана действитедьным значением!");
+}
+
+void MainWindow::on_pushButton_addline_clicked()
+{
+    bool q1, q2, q3, q4;
+    QString strxbeg = ui->lineEdit_xbeg->text();
+    QString strxend = ui->lineEdit_xend->text();
+    QString strybeg = ui->lineEdit_ybeg->text();
+    QString stryend = ui->lineEdit_yend->text();
+
+    int xbeg = strxbeg.toInt(&q1);
+    int xend = strxend.toInt(&q2);
+    int ybeg = strybeg.toInt(&q3);
+    int yend = stryend.toInt(&q4);
+
+    if (q1 && q2 && q3 && q4)
+    {
+        if (ybeg > yend)
+        {
+            swap(&ybeg, &yend);
+            swap(&xbeg, &ybeg);
+        }
+        tail = add_line(xbeg, ybeg, xend, yend, tail);
+        if (!head)
+            head = tail;
+        painter->setPen(color_lines);
+        painter->drawLine(xbeg, ybeg, xend, yend);
+        ui->draw_label->setPixmap(*scene);
+    }
+    else
+        QMessageBox::warning(this, "Ошибка ввода", "Координаты должны быть целочисленными!");
+}
+
 
 void MainWindow::mousePressEvent(QMouseEvent *event)
 {
-    painter->setPen(color_border);
     int x = event->x();
     int y = event->y();
-    int flag = 0;
+
     if (x >= XOFFSET && x <= XOFFSET + SIZE && y >= YOFFSET && y <= YOFFSET + SIZE)
     {
         x -= XOFFSET;
         y -= YOFFSET;
-        if (tail->zamknut)
-            tail = add_contur(tail);
-        if (event->button() == Qt::LeftButton)
+        if (!otcek)
         {
-            if (event->modifiers() == Qt::ShiftModifier)
-            {
-                if (tail->tail != nullptr)
-                {
-                    int xprev = tail->tail->x;
-                    tail->tail = add_point(x, tail->tail->y, tail->tail);
-                    ui->textEdit->append(QString("(%1;%2)").arg(x).arg(y));
-                    painter->drawLine(xprev, tail->tail->y, x, tail->tail->y);
-                }
-                else flag = 1;
-            }
-            else if (event->modifiers() == Qt::ControlModifier)
-            {
-                if (tail->tail != nullptr)
-                {
-                    int yprev = tail->tail->y;
-                    tail->tail = add_point(tail->tail->x, y, tail->tail);
-                    ui->textEdit->append(QString("(%1;%2)").arg(x).arg(y));
-                    painter->drawLine(tail->tail->x, yprev, tail->tail->x, y);
-                }
-                else flag = 1;
-            }
-            else
-            {
-                if (event->modifiers() == Qt::AltModifier)
-                {
-                    xzatr = x;
-                    yzatr = y;
-                    ui->lineEdit_xzatr->setText(QString("%1").arg(x));
-                    ui->lineEdit_yzatr->setText(QString("%1").arg(y));
-                }
-                else
-                {
-                    if (tail->tail != nullptr)
-                    {
-                        int xprev = tail->tail->x;
-                        int yprev = tail->tail->y;
-                        tail->tail = add_point(x, y, tail->tail);
-                        ui->textEdit->append(QString("(%1;%2)").arg(x).arg(y));
-                        painter->drawLine(xprev, yprev, x, y);
-                    }
-                    else flag = 1;
-                }
-            }
-
-            if (flag)
-            {
-                tail->tail = add_point(x, y, tail->tail);
-                ui->textEdit->append(QString("(%1;%2)").arg(x).arg(y));
-                tail->head = tail->tail;
-                painter->drawPoint(x, y);
-            }
+            otcek = create_otcekatel(x, -1, y, -1);
+            painter->setPen(Qt::gray);
+            painter->drawLine(x, 0, x, SIZE);
+            painter->drawLine(0, y, SIZE, y);
+            ui->draw_label->setPixmap(*scene);
+            return;
         }
 
-        if (event->button() == Qt::RightButton)
+        if (!otcek->full)
         {
-            painter->drawLine(tail->head->x, tail->head->y, tail->tail->x, tail->tail->y);
-            tail->tail = add_point(tail->head->x, tail->head->y, tail->tail);
-            ui->textEdit->append(QString("(%1;%2)").arg(tail->head->x).arg(tail->head->y));
-            tail->zamknut = 1;
-            ui->textEdit->append(QString("--------"));
+            otcek->xright = x;
+            otcek->yhigh = y;
+            otcek->full = 1;
+            if (otcek->xleft > otcek->xright)
+                swap(&(otcek->xleft), &(otcek->xright));
+            if (otcek->yhigh < otcek->ylow)
+                swap(&(otcek->yhigh), &(otcek->ylow));
+            scene->fill(QColor(Qt::white));
+            painter->setPen(color_border);
+            painter->drawLine(otcek->xleft, otcek->ylow, otcek->xleft, otcek->yhigh);
+            painter->drawLine(otcek->xleft, otcek->ylow, otcek->xright, otcek->ylow);
+            painter->drawLine(otcek->xleft, otcek->yhigh, otcek->xright, otcek->yhigh);
+            painter->drawLine(otcek->xright, otcek->ylow, otcek->xright, otcek->yhigh);
+            ui->draw_label->setPixmap(*scene);
+            return;
+        }
+
+        if (!tail || tail->full)
+        {
+            tail = add_line(x, y, -1, -1, tail);
+            if (!head)
+                head = tail;
+            painter->setPen(color_lines);
+            painter->drawPoint(x, y);
+            ui->draw_label->setPixmap(*scene);
+            return;
+        }
+
+        if (event->modifiers() == Qt::ShiftModifier)
+        {
+            tail->xend = x;
+            tail->yend = tail->ybeg;
+        }
+        else if (event->modifiers() == Qt::ControlModifier)
+        {
+            tail->yend = y;
+            tail->xend = tail->xbeg;
+        }
+        else
+        {
+            tail->xend = x;
+            tail->yend = y;
+        }
+        if (tail->ybeg > tail->yend)
+        {
+            swap(&(tail->xbeg), &(tail->xend));
+            swap(&(tail->ybeg), &(tail->yend));
+        }
+        tail->full = 1;
+
+        painter->setPen(color_lines);
+        painter->drawLine(tail->xbeg, tail->ybeg, tail->xend, tail->yend);
+        ui->draw_label->setPixmap(*scene);
+        }
+}
+
+void MainWindow::on_pushButton_cut_clicked()
+{
+    painter->setPen(color_result);
+    for (lines_t *line = head; line; line = line->next)
+    {
+        lines_t res = cut_line(*line, otcek, eps);
+        int x = res.xbeg, x1 = res.xend, y = res.ybeg, y1 = res.yend;
+        (void)x;
+        (void)x1;
+        (void)y;
+        (void)y1;
+        if (res.full == 1)
+        {
+
+            painter->drawLine(res.xbeg, res.ybeg, res.xend, res.yend);
         }
         ui->draw_label->setPixmap(*scene);
+
     }
 }
-
-void MainWindow::on_pushButton_clicked()
-{
-    if (xzatr < 0 || yzatr < 0)
-        QMessageBox::warning(this, "Ошибка", "Вы не ввели затравочный пиксель!");
-    else
-    {
-        stack_t *top = push(nullptr, xzatr, yzatr);
-        bool speed_flag = ui->radioButton_slow->isChecked();
-        while (!(stack_is_empty(top)))
-        {
-            int xz, yz;
-            top = pop(top, &xz, &yz);
-            int xleft = xz, xright = xz;
-            QImage img = scene->toImage();
-            QColor color = img.pixelColor(xleft - 1, yz);
-            painter->setPen(color_fill);
-            painter->drawPoint(xz, yz);
-            while (color != color_border)
-            {
-                xleft--;
-                painter->drawPoint(xleft, yz);
-                color = img.pixelColor(xleft - 1, yz);
-            }
-            color = img.pixelColor(xright + 1, yz);
-            while (color != color_border)
-            {
-                xright++;
-                painter->drawPoint(xright, yz);
-                color = img.pixelColor(xright + 1, yz);
-            }
-
-            int y = yz + 1;
-            int x = xleft;
-            int flag;
-            M0:
-            if (x <= xright)
-            {
-                flag = 0;
-                M1:
-                color = img.pixelColor(x, y);
-                if (color != color_border)
-                {
-                    if (color != color_fill)
-                    {
-                        if (x <= xright)
-                        {
-                            flag = 1;
-                            x++;
-                            goto M1;
-                         }
-                        else goto M2;
-                    }
-                    else goto M2;
-                }
-                else
-                {
-                    M2:
-                    if (flag == 1)
-                    {
-                        if (x == xright)
-                        {
-                            color = img.pixelColor(x, y);
-                            if (color != color_border)
-                            {
-                                if (color != color_fill)
-                                {
-                                    top = push(top, x, y);
-                                    goto M4;
-                                }
-                                else goto M3;
-                            }
-                            else goto M3;
-                        }
-                        else
-                        {
-                            M3:
-                            top = push(top, x - 1, y);
-                            goto M4;
-                        }
-                        M4:
-                        flag = 0;
-                        int xt = x;
-                        M5:
-                        color = img.pixelColor(x, y);
-                        if (color == color_border)
-                        {
-                            M6:
-                            if (x < xright)
-                            {
-                                x++;
-                                goto M5;
-                            }
-                        }
-                        else
-                        {
-                            if (color == color_fill)
-                                goto M6;
-                            else
-                            {
-                                if (x == xt)
-                                    x++;
-                                else goto M0;
-                            }
-                        }
-                    }
-                    else goto M4;
-                }
-            }
-            if (y == yz + 1)
-            {
-                x = xleft;
-                y = yz - 1;
-                goto M0;
-            }
-            ui->draw_label->setPixmap(*scene);
-            if (speed_flag)
-                repaint();
-        }
-    }
-}
-
-

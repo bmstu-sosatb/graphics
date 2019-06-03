@@ -26,15 +26,17 @@ private slots:
 
     void on_pushButton_border_clicked();
 
-    void on_pushButton_add_clicked();
-
-    void on_pushButton_clicked();
-
     void on_pushButton_lines_clicked();
 
     void on_pushButton_result_clicked();
 
     void on_pushButton_otcekatel_clicked();
+
+    void on_pushButton_eps_clicked();
+
+    void on_pushButton_addline_clicked();
+
+    void on_pushButton_cut_clicked();
 
 private:
     Ui::MainWindow *ui;
