@@ -85,6 +85,15 @@ void MainWindow::on_pushButton_border_clicked()
     ui->border_color->setAutoFillBackground(true);
     ui->border_color->setPalette(Pal);
     ui->border_color->show();
+    if (otcek)
+    {
+        painter->setPen(color_border);
+        painter->drawLine(otcek->xleft, otcek->ylow, otcek->xleft, otcek->yhigh);
+        painter->drawLine(otcek->xleft, otcek->ylow, otcek->xright, otcek->ylow);
+        painter->drawLine(otcek->xleft, otcek->yhigh, otcek->xright, otcek->yhigh);
+        painter->drawLine(otcek->xright, otcek->ylow, otcek->xright, otcek->yhigh);
+        ui->draw_label->setPixmap(*scene);
+    }
 }
 
 void MainWindow::on_pushButton_lines_clicked()
@@ -95,6 +104,12 @@ void MainWindow::on_pushButton_lines_clicked()
     ui->lines_color->setAutoFillBackground(true);
     ui->lines_color->setPalette(Pal);
     ui->lines_color->show();
+    for (lines_t *line = head; line; line = line->next)
+    {
+        painter->setPen(color_lines);
+        painter->drawLine(line->xbeg, line->ybeg, line->xend, line->yend);
+        ui->draw_label->setPixmap(*scene);
+    }
 }
 
 void MainWindow::on_pushButton_result_clicked()

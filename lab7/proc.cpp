@@ -2,14 +2,12 @@
 
 lines_t cut_line(lines_t line, struct otcekatel *otcek, double eps)
 {
-    lines_t resline;
     struct point Rcur, T, Psr;
     int i = 1;
     M3:
     count_codes(otcek, &line);        //3
     if (line.Sbeg == 0 && line.Send == 0)   //4
     {
-        resline = line;
         goto DRAW;
     }
     if (line.P != 0)     //5
@@ -26,16 +24,16 @@ lines_t cut_line(lines_t line, struct otcekatel *otcek, double eps)
     }
     if (line.Send == 0)     //8
     {
-        if (i == 1)
-        {
-            resline.xbeg = line.xend;
-            resline.ybeg = line.yend;
-        }
-        else
-        {
-            resline.xend = line.xend;
-            resline.yend = line.yend;
-        }
+//        if (i == 1)
+//        {
+//            resline.xbeg = line.xend;
+//            resline.ybeg = line.yend;
+//        }
+//        else
+//        {
+//            resline.xend = line.xend;
+//            resline.yend = line.yend;
+//        }
         line.xbeg = line.xend;   //P1 = P2
         line.ybeg = line.yend;
         line.xend = T.x;   //P2=T
@@ -46,16 +44,6 @@ lines_t cut_line(lines_t line, struct otcekatel *otcek, double eps)
     M9:
     if (abs(line.xbeg - line.xend) <= eps && abs(line.ybeg - line.yend) <= eps)   //9
     {
-        if (i == 1)
-        {
-            resline.xbeg = line.xbeg;
-            resline.ybeg = line.ybeg;
-        }
-        else
-        {
-            resline.xend = line.xbeg;
-            resline.yend = line.ybeg;
-        }
         line.xbeg = line.xend;   //P1 = P2
         line.ybeg = line.yend;
         line.xend = T.x;   //P2=T
@@ -68,8 +56,8 @@ lines_t cut_line(lines_t line, struct otcekatel *otcek, double eps)
         (void)yb;
         goto M3;
     }
-    Psr.x = (line.xbeg + line.xend) / 2;     //10
-    Psr.y = (line.ybeg +line.yend) / 2;
+    Psr.x = (line.xbeg + line.xend) >> 1;     //10
+    Psr.y = (line.ybeg +line.yend) >> 1;
     Rcur.x = line.xbeg;    //R = P1      11
     Rcur.y = line.ybeg;
     line.xbeg = Psr.x;     //P1 = Psr       12
@@ -85,13 +73,12 @@ lines_t cut_line(lines_t line, struct otcekatel *otcek, double eps)
     goto M9;    //16
 
     DRAW:
-//    resline = line;
-    resline.full = 1;
-    return resline;
+    line.full = 1;
+    return line;
     EXIT:
 //    resline = line;
-    resline.full = 0;
-    return resline;
+    line.full = 0;
+    return line;
 }
 
 
