@@ -38,17 +38,17 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->border_color->setAutoFillBackground(true);
     ui->border_color->setPalette(Pal);
 
-    Pal.setColor(QPalette::Background, Qt::red);
+    Pal.setColor(QPalette::Background, Qt::green);
     ui->lines_color->setAutoFillBackground(true);
     ui->lines_color->setPalette(Pal);
 
-    Pal.setColor(QPalette::Background, Qt::green);
+    Pal.setColor(QPalette::Background, Qt::red);
     ui->result_color->setAutoFillBackground(true);
     ui->result_color->setPalette(Pal);
 
     color_border = QColor(Qt::black);
-    color_lines = QColor(Qt::red);
-    color_result = QColor(Qt::green);
+    color_lines = QColor(Qt::green);
+    color_result = QColor(Qt::red);
 
     ui->lineEdit_eps->setText(QString("%1").arg(eps));
 }
