@@ -15,7 +15,8 @@ contur_t otcek = {nullptr, nullptr, 0};
 lines_t *head = nullptr;
 lines_t *tail = head;
 double eps = 1;
-
+double k, b;
+int f = 0;
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -235,41 +236,82 @@ void MainWindow::mousePressEvent(QMouseEvent *event)
         }
         else
         {
-            if (!tail || tail->full)
+            if (event->button() == Qt::LeftButton)
             {
-                tail = add_line(x, y, -1, -1, tail);
-                if (!head)
-                    head = tail;
-                painter->setPen(QPen(color_lines, 2));
-                painter->drawPoint(x, y);
-                ui->draw_label->setPixmap(*scene);
-                return;
-            }
+                if (!tail || tail->full)
+                {
+                    tail = add_line(x, y, -1, -1, tail);
+                    if (!head)
+                        head = tail;
+                    painter->setPen(QPen(color_lines, 2));
+                    painter->drawPoint(x, y);
+                    ui->draw_label->setPixmap(*scene);
+                    return;
+                }
 
-            if (event->modifiers() == Qt::ShiftModifier)
-            {
-                tail->xend = x;
-                tail->yend = tail->ybeg;
-            }
-            else if (event->modifiers() == Qt::ControlModifier)
-            {
-                tail->yend = y;
-                tail->xend = tail->xbeg;
+                if (event->modifiers() == Qt::ShiftModifier)
+                {
+                    tail->xend = x;
+                    tail->yend = tail->ybeg;
+                }
+                else
+                {
+                    if (event->modifiers() == Qt::ControlModifier)
+                    {
+                        tail->yend = y;
+                        tail->xend = tail->xbeg;
+                    }
+                    else
+                    {
+                        if (!f)
+                        {
+                            tail->xend = x;
+                            tail->yend = y;
+                        }
+                        else
+                        {
+                            if (f == -1)
+                            {
+                                tail->yend = y;
+                                tail->xend = tail->xbeg;
+                            }
+                            else
+                            {
+                                tail->xend = x;
+                                tail->yend = k * x + tail->ybeg - k * tail->xbeg;
+                            }
+                            f = 0;
+                        }
+                    }
+                }
+                if (tail->ybeg > tail->yend)
+                {
+                    swap(&(tail->xbeg), &(tail->xend));
+                    swap(&(tail->ybeg), &(tail->yend));
+                }
+                tail->full = 1;
+
+                painter->setPen(QPen(color_lines, 2));
+                painter->drawLine(tail->xbeg, tail->ybeg, tail->xend, tail->yend);
             }
             else
             {
-                tail->xend = x;
-                tail->yend = y;
+                if (otcek.head && otcek.head->next)
+                    for (point_t *ptr = otcek.head->next; ptr; ptr = ptr->next)
+                    {
+                        double yy = ptr->k * x + ptr->b;
+                        if (y >= yy - DIST && y <= yy + DIST)
+                        {
+                            k = ptr->k;
+                            b = ptr->b;
+                            if (!ptr->f)
+                                f = -1;
+                            else f = 1;
+                            return;
+                        }
+                    }
             }
-            if (tail->ybeg > tail->yend)
-            {
-                swap(&(tail->xbeg), &(tail->xend));
-                swap(&(tail->ybeg), &(tail->yend));
-            }
-            tail->full = 1;
 
-            painter->setPen(QPen(color_lines, 2));
-            painter->drawLine(tail->xbeg, tail->ybeg, tail->xend, tail->yend);
         }
         ui->draw_label->setPixmap(*scene);
     }

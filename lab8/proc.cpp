@@ -39,6 +39,7 @@ point_t* add_point(int x, int y, point_t *tail)
     p->next = nullptr;
     p->nx = 0;
     p->ny = 0;
+    p->f = 1;
     if (tail != nullptr)
     {
         tail->next = p;
@@ -57,6 +58,18 @@ point_t* add_point(int x, int y, point_t *tail)
         {
             p->nx = -p->nx;
             p->ny = -p->ny;
+        }
+        if (ax == 0)
+        {
+            p->k = p->x;
+            p->b = p->x;
+            p->f = 0;
+
+        }
+        else
+        {
+            p->k = ay / ax;
+            p->b = p->y - p->k * p->x;
         }
     }
     return p;

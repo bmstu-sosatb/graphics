@@ -15,6 +15,9 @@ struct point
     int y;
     double nx;
     double ny;
+    double k;
+    double b;
+    int f;
     point_t *next;
 };
 
